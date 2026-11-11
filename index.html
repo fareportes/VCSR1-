@@ -109,7 +109,21 @@ tbody tr:hover{background:var(--acs)}
 .card h2{color:var(--ac)}
 #mbody>h2{color:var(--ink)}
 tfoot td{background:var(--acs);color:var(--ac)}
+/* ajuste a pantalla */
+.tag{white-space:nowrap}
+#fit.on{background:var(--acs);border-color:var(--ac);color:var(--ac)}
+body.fit main{max-width:none;padding-left:24px;padding-right:24px}
+body.fit table{font-size:.84rem}
+body.fit th,body.fit td{padding:8px 10px;white-space:normal;vertical-align:top}
+body.fit th,body.fit td.n{white-space:nowrap}
+body.fit .mc{width:min(1320px,100%)}
+body.fit .colbox{right:0}
 /* super */
+#k5{font-size:1.3rem;overflow-wrap:anywhere}
+a.bchip{text-decoration:none;cursor:pointer}
+a.bchip:hover{box-shadow:0 0 0 2px var(--ac) inset}
+.bchip{display:inline-block;padding:1px 9px;border-radius:6px;background:var(--k1b);color:var(--k1f);font-size:.8rem;font-weight:600;margin-right:4px}
+.bchip.off{background:var(--bg);color:var(--mu);font-weight:500}
 .chk{display:flex;gap:8px;align-items:center;color:var(--ink);font-size:.88rem;margin:0;cursor:pointer}
 .chips{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:14px;font-size:.82rem;color:var(--ac);font-weight:600}
 .chips button{height:30px;padding:0 13px;border-radius:999px;font-size:.82rem}
@@ -137,14 +151,28 @@ tfoot td{background:var(--acs);color:var(--ac)}
  .tw{max-height:none;overflow:visible;border:0}
  th{position:static;box-shadow:none;background:#eee;color:#000}
 }
+.rc{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}.rc>div{border:1px solid var(--ln);border-radius:10px;padding:10px 12px}.rc b{display:block;font-size:1.15rem;font-variant-numeric:tabular-nums}.rc span{color:var(--mu);font-size:.8rem}.rc .w b{color:var(--t3f)}
+/* hoja 2: créditos e instituciones */
+.navt{display:flex;gap:8px;margin:0 0 16px}
+.navt button{height:42px;padding:0 20px;font-weight:600}
+#cfgB{background:var(--acs);border-color:transparent}
+#cfgB label{color:var(--ac);font-weight:600}
+#xlsxB{background:var(--gx);border-color:var(--gx);color:#fff}
+#xlsxB:hover{filter:brightness(1.08);background:var(--gx)}
+.pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:6px 16px;max-height:240px;overflow:auto;border:1px solid var(--ln);border-radius:10px;padding:10px 12px}
+.tag.okk{background:var(--k5b);color:var(--k5f)}
+#theadB th[data-k="visitas"],#theadB th[data-k="nf"],#theadB th[data-k="pagos"],#theadB th[data-k="venta"]{text-align:right}
+.adbtn{margin-left:auto}.adbtn[aria-pressed="true"]{background:var(--ac);border-color:var(--ac);color:var(--acx);font-weight:600}
 </style>
 </head>
-<body>
+<body class="fit">
 <main>
 <header class="top">
   <h1>Clientes que no han retornado</h1>
   <p class="sub">Sube tu archivo de ventas y filtra a quienes dejaron de visitar la sucursal. Los datos se procesan en tu navegador.</p>
 </header>
+
+<div class="row tabs navt"><button id="tabA" class="on">Clientes sin retorno</button><button id="tabB">Créditos e instituciones</button></div>
 
 <section class="panel">
   <div class="drop" id="drop"><strong>Arrastra tu archivo aquí</strong> o haz clic para elegirlo<small>CSV o Excel, una fila por línea de factura</small></div>
@@ -153,18 +181,21 @@ tfoot td{background:var(--acs);color:var(--ac)}
   <div id="err" class="err"></div>
 </section>
 
+<div id="viewA">
 <section class="panel hide" id="cfg">
   <div class="grid">
     <div class="f"><label for="days">Días sin volver (mínimo)</label><input type="number" id="days" min="1" value="60"></div>
     <div class="f"><label for="ref">Fecha de referencia</label><input type="date" id="ref"></div>
     <div class="f"><label for="branchF">Sucursal a analizar</label><select id="branchF"><option value="">Todas</option></select></div>
     <div class="f"><label for="modeF">Sin Retorno FA</label><select id="modeF"><option value="none">No compra en ninguna sucursal</option></select></div>
+    <div class="f"><label for="tmA">Tipo de medicamento</label><select id="tmA"><option value="">Todos</option><option value="Consumo">Consumo</option><option value="No Crónico">No Crónico</option><option value="Crónico">Crónico</option><option value="_">Sin clasificar</option></select></div>
     <div class="f"><label for="usuarioF">Usuario Factura</label><select id="usuarioF"><option value="">Todos</option></select></div>
     <div class="f"><label for="teF">Tipo Entrega</label><select id="teF"><option value="">Todos</option></select></div>
-    <div class="f"><label for="minv">Visitas mínimas del cliente</label><input type="number" id="minv" min="1" value="1"></div>
+    <div class="f"><label for="minv">Visitas mínimas (2 o más = lista de llamadas)</label><input type="number" id="minv" min="1" value="2"></div>
+    <div class="f" style="padding-top:22px"><label class="chk"><input type="checkbox" id="exneg" checked> Excluir devoluciones (líneas negativas)</label></div>
     <div class="f"><label for="dfmt">Formato de fecha en texto</label><select id="dfmt"><option value="dmy">día/mes/año</option><option value="mdy">mes/día/año</option></select></div>
   </div>
-<div class="chips" id="chips"><span>Atajos de días:</span><button data-d="30">30</button><button data-d="60">60</button><button data-d="90">90</button><button data-d="180">180</button></div>
+<div class="chips" id="chips"><span>Atajos de días:</span><button data-d="30">30</button><button data-d="60">60</button><button data-d="90">90</button><button data-d="180">180</button><button type="button" id="adA" class="adbtn" aria-pressed="false" title="Mostrar solo los productos que contienen la palabra Adiuvo">Adiuvo</button></div>
   <p class="note" id="modeNote" style="margin:14px 0 0"></p>
 </section>
 
@@ -174,16 +205,20 @@ tfoot td{background:var(--acs);color:var(--ac)}
     <div><b id="k3">0%</b><span>del total de clientes</span></div>
     <div><b id="k1">0</b><span>clientes identificados</span></div>
     <div><b id="k4">0</b><span>días sin volver, en promedio</span></div>
-    <div><b id="k5">0</b><span>en compras de este grupo</span></div>
+    <div title="Suma de la columna Pagos de este grupo de clientes"><b id="k5">0</b><span id="k5l">en compras de este grupo</span><span id="k5s" style="display:block;font-weight:700;margin-top:4px"></span></div>
   </div>
+  <p class="note" id="vnote" style="margin:-4px 0 16px"></p>
+  <div class="card hide" id="resSuc"></div>
+  <details class="card"><summary style="cursor:pointer;font-weight:600;color:var(--ac)">Conciliación con el sistema de origen</summary><div id="recon" style="margin-top:12px"></div></details>
   <div class="charts">
     <div class="card" id="distCard"><h2>¿Hace cuánto no vuelven?</h2><div class="bars" id="dist"></div></div>
     <div class="card"><h2>¿En qué mes fue su última visita?</h2><div class="mon" id="mon"></div></div>
   </div>
   <div class="card">
     <div class="row" style="justify-content:space-between;margin-bottom:12px">
-      <input type="search" id="q" placeholder="Buscar por código o nombre…" style="max-width:280px">
+      <input type="search" id="q" placeholder="Buscar por código, nombre, cédula o teléfono…" style="max-width:280px">
       <div class="row">
+        <button id="fit" class="on" title="Ver todas las columnas en la pantalla sin desplazarte">Ajustar a pantalla</button>
         <details class="colmenu"><summary>Columnas</summary><div class="colbox" id="colbox"></div></details>
         <button id="copy">Copiar</button>
         <button id="csv" class="p">Descargar CSV</button>
@@ -194,14 +229,66 @@ tfoot td{background:var(--acs);color:var(--ac)}
     <div class="row" style="margin-top:8px"><p class="note" id="msg" style="margin:0"></p><button id="more" class="hide">Ver más</button></div>
   </div>
 </section>
+</div>
+
+<div id="viewB" class="hide">
+ <section class="card">
+  <h2 style="font-size:1.25rem;margin:0 0 4px">Créditos e instituciones sin retorno</h2>
+  <p class="note" style="margin:0">Cuentas institucionales o genéricas (columna L); se muestra el cliente heredado de la columna N y se mide si regresó. Incluye lo que la primera hoja deja fuera por ser genérico (Banco Central de Honduras, aseguradoras, asociaciones, empresas, hospitales…). Elige cuáles analizar y cuántos días sin comprar cuentan como sin retorno.</p>
+ </section>
+ <div id="emptyB" class="card note">Sube el archivo de ventas arriba para analizar estas cuentas.</div>
+ <div id="outB" class="hide">
+  <section class="panel" id="cfgB">
+   <div class="grid">
+    <div class="f"><label for="daysB">Días sin volver (mínimo)</label><input type="number" id="daysB" min="1" value="60"></div>
+    <div class="f"><label for="refB">Fecha de referencia</label><input type="date" id="refB"></div>
+    <div class="f"><label for="branchB">Sucursal</label><select id="branchB"><option value="">Todas</option></select></div>
+    <div class="f"><label for="tmB">Tipo de medicamento</label><select id="tmB"><option value="">Todos</option><option value="Consumo">Consumo</option><option value="No Crónico">No Crónico</option><option value="Crónico">Crónico</option><option value="_">Sin clasificar</option></select></div>
+    <div class="f"><label for="tpB">Tipo Pago</label><select id="tpB"><option value="">Todos</option></select></div>
+    <div class="f"><label for="minvB">Visitas mínimas</label><input type="number" id="minvB" min="1" value="1"></div>
+    <div class="f"><label for="scopeB">Mostrar</label><select id="scopeB"><option value="sin">Solo cuentas sin retorno</option><option value="all">Todas las cuentas (con estado)</option></select></div>
+    <div class="f" style="padding-top:22px"><label class="chk"><input type="checkbox" id="exnegB" checked> Excluir devoluciones (líneas negativas)</label></div>
+   </div>
+   <div class="chips" id="chipsB"><span>Atajos de días:</span><button data-d="30">30</button><button data-d="60">60</button><button data-d="90">90</button><button data-d="180">180</button><button type="button" id="adB" class="adbtn" aria-pressed="false" title="Mostrar solo los productos que contienen la palabra Adiuvo">Adiuvo</button></div>
+   <p class="note" id="noteB" style="margin:14px 0 0"></p>
+  </section>
+  <details class="card" id="pickD" open>
+   <summary style="cursor:pointer;font-weight:600;color:var(--ac)" id="pickT"></summary>
+   <div class="row" style="margin:12px 0">
+    <button id="pBC">Solo Banco Central</button><button id="pINST">Instituciones</button><button id="pALL">Todas</button><button id="pNONE">Ninguna</button>
+    <input type="search" id="pickQ" placeholder="Buscar cuenta…" style="max-width:240px">
+   </div>
+   <div class="pick" id="pickL"></div>
+   <p class="note"><b>Instituciones por código de cliente (columna L):</b> 45 Banco Central De Honduras · 1019312 Ferrocarril Nacional De Honduras · 1011764 Stibys · 99730572 Banco Atlantida Sa · 2087723857 Centro Cultural Sampedrano · 1018175 Banco Atlantida Impuesto. Para cada una se analiza el cliente heredado de la columna N: ese es el cliente que aparece en la lista y se mide si regresó.</p>
+   <p class="note">«Instituciones» marca bancos, aseguradoras, asociaciones, fundaciones, cooperativas, hospitales, clínicas, empresas (S.A.) y grupos. Consumidor final, descuentos, empleados y similares aparecen sin marcar.</p>
+  </details>
+  <div class="strip">
+   <div class="lead"><b id="b2">0</b><span>cuentas no han retornado</span></div>
+   <div><b id="b3">0%</b><span>del total de cuentas</span></div>
+   <div><b id="b1">0</b><span>cuentas analizadas</span></div>
+   <div><b id="b4">0</b><span>días sin volver, en promedio</span></div>
+   <div title="Suma de la columna Pagos de este grupo"><b id="b5" style="font-size:1.3rem;overflow-wrap:anywhere">0</b><span>en pagos de este grupo</span><span id="b5s" style="display:block;font-weight:700;margin-top:4px"></span></div>
+  </div>
+  <div class="card"><h2>¿Hace cuánto no vuelven?</h2><div class="bars" id="distB"></div></div>
+  <div class="card">
+   <div class="row" style="justify-content:space-between;margin-bottom:12px">
+    <input type="search" id="qB" placeholder="Buscar por código, nombre o sucursal…" style="max-width:280px">
+    <div class="row"><button id="copyB">Copiar</button><button id="csvB" class="p">Descargar CSV</button><button id="xlsxB">Descargar Excel</button></div>
+   </div>
+   <div class="tw"><table><thead id="theadB"></thead><tbody id="tbodyB"></tbody></table></div>
+   <div class="row" style="margin-top:8px"><p class="note" id="msgB" style="margin:0"></p><button id="moreB" class="hide">Ver más</button></div>
+  </div>
+ </div>
+</div>
 </main>
 <div id="modal" class="hide"><div class="mc"><button id="mclose" class="x" aria-label="Cerrar">✕</button><div id="mbody"></div></div></div>
 
 <script>
 (function(){
 var $=function(i){return document.getElementById(i)};
-var rows=[],headers=[],recs=[],result=[],cols=[],sortK='dias',sortD=-1,dl=null,wb=null,shown=300,info='',maxD=null,skipName=0,skipDate=0,bname={},nB=0,allCols=[],hid={};
-var idx={n1:-1,n2:-1,d:-1,b:-1,a:-1,u:-1,f:-1,p:-1,cat:-1,cd:-1,q:-1,pr:-1,ds:-1,pg:-1,tp:-1,c1:-1,c2:-1,bn:-1,te:-1};
+var rows=[],headers=[],recs=[],result=[],cols=[],sortK='dias',sortD=-1,dl=null,wb=null,shown=300,info='',maxD=null,skipName=0,skipDate=0,bname={},nB=0,allCols=[],hid={todos:1},curNb='',totAll=0,cli={},qa={},recsB=[],accB={},selB={},resB=[],colsB=[],sortKB='dias',sortDB=-1,shownB=300,adA=false,adB=false,nAd=0,nTm=0,nLc=0;
+var idx={n1:-1,n2:-1,d:-1,b:-1,a:-1,u:-1,f:-1,p:-1,cat:-1,cd:-1,q:-1,pr:-1,ds:-1,pg:-1,tp:-1,c1:-1,c2:-1,bn:-1,te:-1,ce:-1,tl:-1};
+var TE=/tercera edad/;
 var GEN=['consumidor final','descuento','grupo','seguro','insurance','psm','poliza','copago','mediprocesos','cxc','perdido','empleados','banco','poder judicial','asociacion','s.a','sinapsis','mapfre','crefisa','fundacion','cooperativa','hospital','clinica','tg-','zona '];
 
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
@@ -210,7 +297,7 @@ function bestSheet(){var best=wb.SheetNames[0],bn=-1;wb.SheetNames.forEach(funct
 function blabel(k){return bname[k]&&bname[k]!==k?k+' · '+bname[k]:k}
 function iso(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
 function fmtD(d){return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()}
-function fm(n,dec){return n.toLocaleString('es',{minimumFractionDigits:dec||0,maximumFractionDigits:dec||0})}
+function fm(n,dec){return n.toLocaleString('en-US',{minimumFractionDigits:dec||0,maximumFractionDigits:dec||0})}
 function norm(s){return String(s==null?'':s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim()}
 function num(v){if(typeof v==='number')return v;var x=parseFloat(String(v).replace(/,/g,''));return isNaN(x)?0:x}
 
@@ -257,8 +344,8 @@ function detect(){
   idx.b=find(/nombre de sucursal|sucursal|tienda|branch|sede/);
   idx.a=find(/^venta$|monto|importe/);
   idx.u=find(/^usuario$|^vendedor$/);if(idx.u<0&&headers.length>17)idx.u=17;
-  idx.f=find(/^factura$/);idx.p=find(/^producto$/);idx.cat=find(/categoria/);idx.cd=find(/^codigo$/);
-  idx.q=find(/^cantidad$/);idx.pr=find(/^precio$/);idx.ds=find(/^descuentos$/);idx.pg=find(/^pagos$/);idx.tp=find(/^tipo pago$/);idx.c1=find(/^codigo de cliente heredado$/);idx.c2=find(/^codigo de cliente$/);idx.bn=find(/^nombre de sucursal$/);idx.te=find(/^tipo entrega$/);
+  idx.f=find(/^factura$/);idx.p=find(/^producto$/);idx.cat=find(/categoria/);idx.pn=idx.p>=0?idx.p:find(/producto|descripcion|articulo|item/);idx.cd=find(/^codigo$/);
+  idx.q=find(/^cantidad$/);idx.pr=find(/^precio$/);idx.ds=find(/^descuentos$/);idx.pg=find(/^pagos$/);idx.tp=find(/^tipo pago$/);idx.c1=find(/^codigo de cliente heredado$/);idx.c2=find(/^codigo de cliente$/);idx.bn=find(/^nombre de sucursal$/);idx.te=find(/^tipo entrega$/);idx.ce=find(/cedula|identidad|^rtn$|^dni$/);idx.tl=find(/telefono|celular|movil|^tel$/);
 }
 
 function buildRecs(){
@@ -266,28 +353,38 @@ function buildRecs(){
     if(raw===''||raw==null)return null;
     var c=cache[raw];
     if(c===undefined){var n=norm(raw).replace(/^inactivo /,'');c=null;
-      if(n&&!/^\d/.test(n)&&!GEN.some(function(w){return n.indexOf(w)>-1}))c=n;cache[raw]=c}
+      if(n&&!/^\d/.test(n)&&(!GEN.some(function(w){return n.indexOf(w)>-1})||TE.test(n)))c=n;cache[raw]=c}
     return c;
   };
-  recs=[];skipName=0;skipDate=0;maxD=null;
+  recs=[];recsB=[];nAd=0;nTm=0;nLc=0;invTm={};cli={};skipName=0;skipDate=0;maxD=null;
   for(var i=0;i<rows.length;i++){
     var r=rows[i],d=parseDate(r[idx.d],fmt);
     if(!d){skipDate++;continue}
     if(!maxD||d>maxD)maxD=d;
+    var lraw=idx.n2>=0?String(r[idx.n2]==null?'':r[idx.n2]).trim():'',lcode=ncode(gv(r,idx.c2)),nL=norm(lraw).replace(/^inactivo /,''),
+        catc=INSTC[lcode]?lcode:(INSTK[nL]||''),genL=!!nL&&!/^\d/.test(nL)&&nL.indexOf('consumidor final')<0&&!TE.test(nL)&&GEN.some(function(w){return nL.indexOf(w)>-1}),
+        instLabel=catc?INSTC[catc]:lraw.replace(/^inactivo /i,''),pkey=idx.n1>=0?ok(r[idx.n1]):null,ch=gv(r,idx.c1),pushedB=false,tmv=idx.cd>=0?(TM[ncode(r[idx.cd])]||''):'',fk=gv(r,idx.f)?gv(r,idx.f)+'|'+(idx.b>=0?String(r[idx.b]).trim():''):'',adv=(idx.pn>=0&&norm(r[idx.pn]).indexOf('adiuvo')>-1)?1:0,
+        bR={i:i,ad:adv,tm:tmv,fk:fk,t:+d,b:idx.b>=0?String(r[idx.b]).trim():'',a:idx.a>=0?num(r[idx.a]):0,u:idx.u>=0?String(r[idx.u]).trim():'',pg:nv(r,idx.pg),tp:gv(r,idx.tp),f:gv(r,idx.f)};
+    if(fk)(invTm[fk]||(invTm[fk]={}))[tmv||'_']=1;
+    if((catc||genL)&&pkey){var o1=Object.assign({k:'h:'+pkey,ik:norm(instLabel),inst:instLabel,n:String(r[idx.n1]).trim().replace(/^inactivo /i,''),cc:ch,ch:ch,catc:catc},bR);recsB.push(o1);pushedB=true}
+    else if(catc){var o2=Object.assign({k:norm(instLabel),ik:norm(instLabel),inst:instLabel,n:instLabel,cc:lcode,ch:ch,catc:catc},bR);recsB.push(o2);pushedB=true}
     var key=idx.n1>=0?ok(r[idx.n1]):null,raw=idx.n1>=0?r[idx.n1]:'',cc=idx.n1>=0?gv(r,idx.c1):'';
     if(!key&&idx.n2>=0){key=ok(r[idx.n2]);raw=r[idx.n2];cc=gv(r,idx.c2)}
-    if(!key){skipName++;continue}
-    recs.push({i:i,k:key,cc:cc,n:String(raw).trim().replace(/^inactivo /i,''),t:+d,b:idx.b>=0?String(r[idx.b]).trim():'',a:idx.a>=0?num(r[idx.a]):0,u:idx.u>=0?String(r[idx.u]).trim():'',te:gv(r,idx.te)});
+    if(!key){skipName++;var pk=instPick(r);if(pk&&!pushedB)recsB.push({i:i,ad:adv,tm:tmv,fk:fk,k:pk.n,ik:pk.n,inst:pk.raw,n:pk.raw,cc:gv(r,pk.j===idx.n1?idx.c1:idx.c2),ch:gv(r,idx.c1),catc:'',t:+d,b:idx.b>=0?String(r[idx.b]).trim():'',a:idx.a>=0?num(r[idx.a]):0,u:idx.u>=0?String(r[idx.u]).trim():'',pg:nv(r,idx.pg),tp:gv(r,idx.tp),f:gv(r,idx.f)});continue}
+    var cl0=cli[key]||(cli[key]={n:String(raw).trim().replace(/^inactivo /i,''),c:{}});if(cc)cl0.c[cc]=1;
+    var lc=(lraw&&!/^\d/.test(nL)&&nL.indexOf('consumidor final')<0&&nL!==key&&(TE.test(nL)||GEN.some(function(w){return nL.indexOf(w)>-1})))?lraw.replace(/^inactivo /i,''):'';if(lc)nLc++;
+    nAd+=adv;if(tmv)nTm++;recs.push({lc:lc,i:i,ad:adv,tm:tmv,fk:fk,k:key,cc:cc,n:String(raw).trim().replace(/^inactivo /i,''),t:+d,b:idx.b>=0?String(r[idx.b]).trim():'',a:idx.a>=0?num(r[idx.a]):0,u:idx.u>=0?String(r[idx.u]).trim():'',te:gv(r,idx.te),pg:nv(r,idx.pg),ce:gv(r,idx.ce),tl:gv(r,idx.tl)});
   }
 }
 
+function tmInit(){['tmA','tmB'].forEach(function(i){var e=$(i);e.disabled=!nTm;e.title=nTm?'':'No encontré códigos de producto del catálogo en este archivo (columna Codigo)';if(!nTm)e.value=''})}
 function setData(arr){
   arr=arr.filter(function(r){return r.some(function(c){return c!==''&&c!=null})});
   if(arr.length<2){$('err').textContent='El archivo no tiene datos suficientes.';return}
   headers=arr[0].map(function(h,i){h=String(h==null?'':h).trim();return h===''?'Columna '+(i+1):h});
   rows=arr.slice(1);detect();
   if(idx.d<0||(idx.n1<0&&idx.n2<0)){$('err').textContent='No encontré las columnas de cliente y fecha. Verifica los encabezados del archivo.';return}
-  buildRecs();
+  buildRecs();tmInit();
   if(!recs.length){$('err').textContent='No se pudieron leer fechas válidas. Prueba cambiando el formato de fecha.';$('cfg').classList.remove('hide');return}
   var set={};recs.forEach(function(r){if(r.b)set[r.b]=1});
   bname={};
@@ -308,7 +405,7 @@ function setData(arr){
   $('teF').innerHTML='<option value="">Todos ('+tk.length+')</option>'+tk.map(function(k){return '<option value="'+esc(k)+'">'+esc(k)+'</option>'}).join('');
   if(tk.indexOf(ct)>-1)$('teF').value=ct;
   $('teF').parentNode.classList.toggle('hide',idx.te<0);
-  $('ref').value=iso(maxD);
+  $('ref').value=iso(maxD);recon();buildB();
   $('cfg').classList.remove('hide');
   $('drop').classList.add('mini');$('fileinfo').innerHTML='<span class="ok">✓</span> '+fm(rows.length)+' filas leídas · datos hasta el '+fmtD(maxD);
   calc();
@@ -329,52 +426,55 @@ function readFile(f){
 
 function calc(){
   if(!recs.length)return;
-  var days=Math.max(1,+$('days').value||60),minv=Math.max(1,+$('minv').value||1),bf=$('branchF').value,
+  var exn=$('exneg').checked,days=Math.max(1,+$('days').value||60),minv=Math.max(1,+$('minv').value||1),bf=$('branchF').value,
       ref=$('ref').value?new Date($('ref').value+'T00:00:00'):maxD;
   ref.setHours(0,0,0,0);var rt=+ref,map={},seen={},ab={},mode=$('modeF').value,onlyB=mode.indexOf('only:')===0?mode.slice(5):'',nb=mode.indexOf('nobuy:')===0?mode.slice(6):'',bf0=nb||bf,bfx=(mode==='none'||onlyB)?'':bf0;
-  if(nb)$('branchF').value=nb;
+  curNb=nb;if(nb)$('branchF').value=nb;
   $('branchF').disabled=!!(onlyB||nb);
-  $('modeNote').textContent=mode==='none'?'Clientes que no han comprado en ninguna sucursal en '+days+' días o más'+(bf0?' y que alguna vez compraron en '+blabel(bf0)+'.':'.'):onlyB?'Clientes que solo han comprado en '+blabel(onlyB)+' y no han vuelto en '+days+' días o más.':bf0?'Clientes que no han vuelto a '+blabel(bf0)+' en '+days+' días o más. Pueden comprar en otras sucursales: revisa la columna Compra en.':'';
+  $('modeNote').textContent=mode==='none'?bf0?'Clientes que solo han comprado en '+blabel(bf0)+' (en ninguna otra sucursal) y no han vuelto en '+days+' días o más.':'Clientes que no han comprado en ninguna sucursal en '+days+' días o más.':onlyB?'Clientes que solo han comprado en '+blabel(onlyB)+' y no han vuelto en '+days+' días o más.':bf0?'Clientes que no han vuelto a '+blabel(bf0)+' en '+days+' días o más. Pueden comprar en otras sucursales: revisa la columna Compra en.':'';
+  if(adA)$('modeNote').textContent+=' Solo productos que contienen «Adiuvo».';
+  if($('tmA').value)$('modeNote').textContent+=' Tipo de medicamento: '+tmLbl($('tmA').value)+' (facturas con al menos un producto de ese tipo, completas).';
   for(var i=0;i<recs.length;i++){
     var r=recs[i];
-    if(r.t>rt)continue;
+    if(adA&&!r.ad)continue;if(!tmOk(r,$('tmA').value))continue;if(r.t>rt)continue;if(exn&&(r.pg<0||r.a<0))continue;
     seen[r.k]=1;(ab[r.k]||(ab[r.k]={}))[r.b]=1;
     if(bfx&&r.b!==bfx)continue;
     var c=map[r.k];
-    if(!c)c=map[r.k]={key:r.k,codigo:r.cc,nombre:r.n,sucursal:r.b,ultima:r.t,visitas:0,monto:0,usuario:r.u,te:r.te,f:{}};
+    if(!c)c=map[r.k]={key:r.k,codigo:'',cods:{},pb:0,ub:0,ce:'',tl:'',nombre:r.n,sucursal:r.b,ultima:r.t,visitas:0,monto:0,pagos:0,usuario:r.u,te:r.te,f:{}};
     if(!c.f[r.t]){c.f[r.t]=1;c.visitas++}
-    c.monto+=r.a;if(!c.codigo&&r.cc)c.codigo=r.cc;
+    c.monto+=(idx.pg>=0?r.pg:r.a);c.pagos+=r.pg;if(bf0&&r.b===bf0){c.pb+=(idx.pg>=0?r.pg:r.a);if(r.t>c.ub)c.ub=r.t}if(r.cc)c.cods[r.cc]=1;if(r.ce&&!c.ce)c.ce=r.ce;if(r.tl&&!c.tl)c.tl=r.tl;if(r.lc)(c.lcs||(c.lcs={}))[r.lc]=1;
     if(r.t>=c.ultima){c.ultima=r.t;c.sucursal=r.b;c.usuario=r.u;c.te=r.te}
   }
-  result=[];var tot=0,sum=0,mo=0,uf=$('usuarioF').value,tf=$('teF').value;
+  result=[];var mb=0,vc=[0,0,0],tot=0,sum=0,mo=0,mo2=0,uf=$('usuarioF').value,tf=$('teF').value;
   for(var k in map){var c=map[k];if(uf&&c.usuario!==uf)continue;if(tf&&c.te!==tf)continue;
-    if(mode==='none'){if(bf0&&!(ab[k]&&ab[k][bf0]))continue}
+    if(mode==='none'){if(bf0){var kb=Object.keys(ab[k]||{});if(!(kb.length===1&&kb[0]===bf0))continue}}
     else if(onlyB){var kk=Object.keys(ab[k]||{});if(!(kk.length===1&&kk[0]===onlyB))continue}
-    c.sucs=Object.keys(ab[k]||{}).sort().join(', ');tot++;c.dias=Math.round((rt-c.ultima)/86400000);c.ultima=new Date(c.ultima);
-    if(c.dias>=days&&c.visitas>=minv){c.monto=Math.round(c.monto*100)/100;result.push(c);sum+=c.dias;mo+=c.monto}}
+    var cl=Object.keys(c.cods).sort(function(a,b){return a.length-b.length||(a<b?-1:1)});c.cuenta=Object.keys(c.lcs||{}).sort().join(', ');c.codigo=cl[0]||'';c.ncod=cl.length;c.todos=cl.join(', ');c.sucs=Object.keys(ab[k]||{}).sort().join(', ');tot++;c.dias=Math.round((rt-c.ultima)/86400000);c.ultima=new Date(c.ultima);
+    if(c.dias>=days){vc[0]++;if(c.visitas>=2)vc[1]++;if(c.visitas>=3)vc[2]++}
+    if(c.dias>=days&&c.visitas>=minv){c.monto=Math.round(c.monto*100)/100;result.push(c);sum+=c.dias;mo+=c.monto;mo2+=c.pagos;mb+=c.pb}}
   var MS={},mn=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
   result.forEach(function(c){var m=c.ultima.getFullYear()*100+c.ultima.getMonth();MS[m]=(MS[m]||0)+1});
   var mk=Object.keys(MS).map(Number).sort(function(a,b){return a-b}),mx2=Math.max.apply(null,mk.map(function(m){return MS[m]}).concat(1));
   $('mon').innerHTML=mk.length?mk.map(function(m){var n=MS[m];return '<div class="mcol"><em>'+fm(n)+'</em><div class="bw"><i style="height:'+Math.max(2,n/mx2*100)+'%"></i></div><span>'+mn[m%100]+' '+String(Math.floor(m/100)).slice(2)+'</span></div>'}).join(''):'<p class="note">Sin datos</p>';
   Array.prototype.forEach.call($('chips').querySelectorAll('button'),function(b){b.classList.toggle('on',+b.dataset.d===days)});
-  $('k1').textContent=fm(tot);$('k2').textContent=fm(result.length);
+  totAll=tot;$('vnote').textContent='Entre los clientes sin retorno ('+fm(vc[0])+'): '+fm(vc[1])+' tienen 2 o más visitas, '+fm(vc[2])+' tienen 3 o más y '+fm(vc[0]-vc[1])+' compraron una sola vez (compradores ocasionales).';$('k1').textContent=fm(tot);$('k2').textContent=fm(result.length);
   $('k3').textContent=(tot?(result.length/tot*100).toFixed(1):0)+'%';
   $('k4').textContent=result.length?fm(Math.round(sum/result.length)):'0';
-  $('k5').textContent=idx.a>=0?fm(mo):'—';
+  $('k5').textContent=idx.pg>=0?'L '+fm(mo2,2):(idx.a>=0?'L '+fm(mo,2):'—');var sb=!!(bf0&&mode==='none');$('k5l').textContent='en compras de este grupo';$('k5s').textContent=sb?'En '+blabel(bf0)+': L '+fm(mb,2):'';
   var B=[[days,days+29],[days+30,days+89],[days+90,days+179],[days+180,1e9]],cnt=[0,0,0,0];
   result.forEach(function(c){for(var j=0;j<4;j++){if(c.dias>=B[j][0]&&c.dias<=B[j][1]){cnt[j]++;break}}});
   var mx=Math.max.apply(null,cnt.concat(1));
   $('dist').innerHTML=B.map(function(b,j){var lb=b[1]>=1e9?b[0]+'+ días':b[0]+'–'+b[1]+' días';
     return '<div class="bar s'+j+'"><span>'+lb+'</span><div class="tr"><i style="width:'+(cnt[j]/mx*100)+'%"></i></div><em>'+fm(cnt[j])+'</em></div>'}).join('');
   info=(skipName?fm(skipName)+' filas ignoradas por cliente genérico o vacío (consumidor final, descuentos, aseguradoras…). ':'')+(skipDate?skipDate+' sin fecha válida. ':'');
-  cols=(idx.c1>=0||idx.c2>=0?[['codigo','Código']]:[]).concat([['nombre','Cliente']]);
+  cols=(idx.c1>=0||idx.c2>=0?[['codigo','Código']]:[]).concat([['nombre','Cliente']]);if(nLc)cols.push(['cuenta','Descuento / cuenta']);if(idx.ce>=0)cols.push(['ce','Cédula']);if(idx.tl>=0)cols.push(['tl','Teléfono']);
   if(idx.b>=0)cols.push(['sucursal','Última sucursal']);
-  if(idx.b>=0&&nB>1)cols.push(['sucursales','Compra en']);
+  if(idx.b>=0)cols.push(['sucs','Compra en']);
   if(idx.u>=0)cols.push(['usuario','Usuario Factura']);
   if(idx.te>=0)cols.push(['te','Tipo Entrega']);
   cols.push(['ultima','Última visita'],['dias','Días sin volver'],['visitas','Visitas']);
-  if(idx.a>=0)cols.push(['monto','Monto acumulado']);
-  allCols=cols;drawColMenu();applyCols();
+  if(idx.a>=0||idx.pg>=0)cols.push(['monto',(idx.pg>=0?'Pagos':'Venta')+(bf0?' en '+bf0:'')]);
+  sucSummary(nb,rt,exn);allCols=cols;drawColMenu();applyCols();
   $('out').classList.remove('hide');shown=300;render();
 }
 function applyCols(){
@@ -389,21 +489,44 @@ function drawColMenu(){
 }
 function view(){
   var q=norm($('q').value);
-  var l=result.filter(function(c){return !q||norm(c.nombre+' '+c.sucursal+' '+(c.codigo||'')).indexOf(q)>-1});
+  var l=result.filter(function(c){return !q||norm(c.nombre+' '+(c.cuenta||'')+' '+c.sucursal+' '+(c.codigo||'')+' '+(c.todos||'')+' '+(c.ce||'')+' '+(c.tl||'')).indexOf(q)>-1});
   l.sort(function(a,b){var x=a[sortK],y=b[sortK];if(x instanceof Date){x=+x;y=+y}
     if(typeof x==='string')return x.localeCompare(y,undefined,{numeric:true})*sortD;return (x-y)*sortD});
   return l;
 }
+function whyHidden(qv,isB){
+  var q=norm(qv);if(q.length<3)return '';
+  var src=isB?recsB:recs,oth=isB?recs:recsB,m={},k,i,r,ref=$(isB?'refB':'ref').value,rt=ref?+new Date(ref+'T00:00:00'):+maxD,
+      days=Math.max(1,+$(isB?'daysB':'days').value||60),minv=Math.max(1,+$(isB?'minvB':'minv').value||1),exn=$(isB?'exnegB':'exneg').checked,
+      bf=$(isB?'branchB':'branchF').value,tmv=$(isB?'tmB':'tmA').value,adOn=isB?adB:adA;
+  function hit(r){return norm(r.n+' '+(r.cc||'')+' '+(r.ch||'')+' '+(r.lc||'')+' '+(r.inst||'')).indexOf(q)>-1}
+  for(i=0;i<src.length;i++){r=src[i];if(!hit(r))continue;var e=m[r.k]||(m[r.k]={n:r.n,d:{},last:0,bs:{},nr:0,ad:0,tm:0});
+    e.nr++;if(exn&&(r.pg<0||r.a<0))continue;if(r.t>rt)continue;e.d[r.t]=1;if(r.t>e.last)e.last=r.t;if(r.b)e.bs[r.b]=1;if(r.ad)e.ad++;if(tmOk(r,tmv))e.tm++}
+  var ks=Object.keys(m);
+  if(!ks.length){var o=false;for(i=0;i<oth.length&&!o;i++)if(hit(oth[i]))o=true;
+    return '<div class="note" style="white-space:normal;margin-top:6px">'+(o?'No está en esta hoja, pero sí aparece en la otra pestaña (Créditos e instituciones / Clientes sin retorno).':'No encontré ese nombre ni código en el archivo cargado.')+'</div>'}
+  var out=ks.slice(0,5).map(function(k){var e=m[k],vis=Object.keys(e.d).length,dias=e.last?Math.round((rt-e.last)/86400000):0,why=[];
+    if(!vis)why.push('todas sus líneas se excluyen (devoluciones o fecha posterior a la de referencia)');
+    if(vis&&vis<minv)why.push('tiene '+vis+' visita'+(vis===1?'':'s')+' y las visitas mínimas están en '+minv);
+    if(vis&&dias<days)why.push('su última compra fue hace '+dias+' días y el mínimo es '+days+' (sí ha regresado)');
+    if(adOn&&!e.ad)why.push('el botón Adiuvo está activo y no compró productos Adiuvo');
+    if(tmv&&!e.tm)why.push('el filtro de tipo de medicamento no coincide con sus compras');
+    if(bf&&!e.bs[bf])why.push('no compró en la sucursal elegida ('+bf+')');
+    if(!why.length)why.push('cumple los criterios básicos; revisa el modo «Sin Retorno FA», la sucursal o el usuario elegidos');
+    return '<li><b>'+esc(e.n)+'</b>: '+esc(why.join('; '))+'.</li>'}).join('');
+  return '<div class="note" style="white-space:normal;margin-top:6px">Sí existe en el archivo, pero la lista lo oculta por los filtros actuales:<ul style="margin:4px 0 0 18px;padding:0">'+out+'</ul></div>';
+}
 function render(){
   var l=view(),s=l.slice(0,shown);
   $('tbody').innerHTML=s.map(function(c){return '<tr>'+cols.map(function(k){var v=c[k[0]];
+    if(k[0]==='sucs')return '<td>'+(v?v.split(', ').map(function(b){return '<a href="#" class="bchip lkb'+(curNb&&b===curNb?' off':'')+'" data-k="'+esc(c.key)+'" data-b="'+esc(b)+'" title="Ver facturas en '+esc(b)+'">'+esc(b)+'</a>'}).join(''):'—')+'</td>';
     if(k[0]==='ultima')return '<td>'+fmtD(v)+'</td>';
     if(k[0]==='dias')return '<td><span class="tag '+(v>=180?'t3':v>=90?'t2':'')+'">'+v+' días</span></td>';
     if(k[0]==='visitas')return '<td class="n">'+fm(v)+'</td>';
-    if(k[0]==='codigo')return '<td class="cd">'+esc(v)+'</td>';
-    if(k[0]==='monto')return '<td class="n">'+fm(v,2)+'</td>';
+    if(k[0]==='codigo')return '<td class="cd">'+esc(v)+(c.ncod>1?' <span class="bchip" title="'+esc(c.todos)+'">varios códigos</span>':'')+'</td>';
+    if(k[0]==='monto'||k[0]==='pb')return '<td class="n">'+fm(v,2)+'</td>';
     if(k[0]==='nombre')return '<td><a href="#" class="lk" data-k="'+esc(c.key)+'">'+esc(v)+'</a></td>';
-    return '<td>'+esc(v)+'</td>'}).join('')+'</tr>'}).join('')||'<tr><td colspan="9">Sin resultados con estos criterios.</td></tr>';
+    return '<td>'+esc(v)+'</td>'}).join('')+'</tr>'}).join('')||'<tr><td colspan="9">Sin resultados con estos criterios.'+whyHidden($('q').value,false)+'</td></tr>';
   $('msg').textContent='Mostrando '+fm(Math.min(shown,l.length))+' de '+fm(l.length)+' clientes (la descarga incluye todos). '+info+'';
   $('more').classList.toggle('hide',l.length<=shown);
 }
@@ -426,6 +549,69 @@ function save(name,data,mime){
   }
   try{localSave(name,blob)}catch(x){alert('No se pudo descargar. Usa Copiar y pega en Excel.')}
 }
+function sucSummary(nb,rt,exn){
+var box=$('resSuc');
+if(!nb||!result.length||idx.b<0){box.classList.add('hide');return}
+var set={},ul={},A={},pg=idx.pg>=0,lb=pg?'Pagos':'Venta',N=result.length;
+function mk(){return {c:{},v:{},p:0,ca:{},va:{},pa:0}}
+var O=mk();
+result.forEach(function(c){set[c.key]=1;ul[c.key]=+c.ultima});
+recs.forEach(function(r){
+if(adA&&!r.ad)return;if(!tmOk(r,$('tmA').value))return;
+ if(r.t>rt||!set[r.k]||(exn&&(r.pg<0||r.a<0)))return;
+ var b=r.b||'(sin sucursal)',v=pg?r.pg:r.a,aft=r.t>ul[r.k],vk=r.k+'|'+r.t+'|'+b,e=A[b]||(A[b]=mk());
+ [e].concat(b!==nb?[O]:[]).forEach(function(x){x.c[r.k]=1;x.v[vk]=1;x.p+=v;if(aft){x.ca[r.k]=1;x.va[vk]=1;x.pa+=v}});
+});
+var n=function(o){return Object.keys(o).length},
+row=function(name,e,hl,af){return '<tr'+(hl?' style="font-weight:700"':'')+'><td>'+name+'</td><td class="n">'+fm(n(e.c))+'</td><td class="n">'+fm(n(e.v))+'</td><td class="n">'+fm(e.p,2)+'</td>'+(af?'<td class="n">'+fm(n(e.ca))+'</td><td class="n">'+(n(e.ca)/N*100).toFixed(1)+'%</td><td class="n">'+fm(n(e.va))+'</td><td class="n">'+fm(e.pa,2)+'</td>':'<td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td>')+'</tr>'},
+ks=Object.keys(A).sort(function(a,b){return a===nb?-1:b===nb?1:A[b].pa-A[a].pa}),
+R='style="text-align:right"',C='style="text-align:center"',pn=A[nb]?A[nb].p:0,nn=esc(nb);
+box.innerHTML='<h2>Dónde compran los '+fm(N)+' clientes que no han vuelto a '+esc(blabel(nb))+'</h2>'+
+'<p class="note" style="margin:0 0 12px;color:var(--ink)"><b>'+fm(n(O.ca))+' de '+fm(N)+' ('+(n(O.ca)/N*100).toFixed(1)+'%)</b> compraron en otra sucursal después de su última compra en '+nn+' (L '+fm(O.pa,2)+' en '+fm(n(O.va))+' visitas). Los otros '+fm(N-n(O.ca))+' no han comprado en ninguna sucursal desde entonces.</p>'+
+'<div class="tw"><table><thead><tr><th></th><th colspan="3" '+C+'>Todo el periodo</th><th colspan="4" '+C+'>Después de su última compra en '+nn+'</th></tr><tr><th>Sucursal</th><th '+R+'>Clientes</th><th '+R+'>Visitas</th><th '+R+'>'+lb+'</th><th '+R+'>Clientes</th><th '+R+'>% de la lista</th><th '+R+'>Visitas</th><th '+R+'>'+lb+'</th></tr></thead><tbody>'+
+ks.map(function(b){return row(esc(blabel(b))+(b===nb?' <span class="bchip off">analizada</span>':''),A[b],false,b!==nb)}).join('')+
+'</tbody><tfoot>'+row('Otras sucursales (total)',O,true,true)+'</tfoot></table></div>'+
+'<p class="note">Verificación: '+lb+' de estos clientes en todas las sucursales = L '+fm(pn+O.p,2)+' (L '+fm(pn,2)+' en '+nn+' + L '+fm(O.p,2)+' en otras). Las visitas del total suman las de cada sucursal (un día en dos sucursales cuenta dos veces). Los clientes no se suman: uno puede comprar en varias sucursales.</p>';
+box.classList.remove('hide')}
+function sel(i){var e=$(i);return e.options[e.selectedIndex]?e.options[e.selectedIndex].text:''}
+function params(){var pg=idx.pg>=0;return [['Parámetro','Valor'],['Reporte','Clientes que no han retornado'],['Solo productos que contienen Adiuvo',adA?'Sí':'No'],['Tipo de medicamento',tmLbl($('tmA').value)],['Generado',new Date().toLocaleString('es-HN')],['Fecha de referencia',$('ref').value],['Días sin volver (mínimo)',+$('days').value],['Visitas mínimas',+$('minv').value],['Sucursal',sel('branchF')],['Sin Retorno FA',sel('modeF')],['Usuario Factura',sel('usuarioF')],['Tipo Entrega',sel('teF')],['Formato de fecha',sel('dfmt')],['Excluir devoluciones (líneas negativas)',$('exneg').checked?'Sí':'No'],['Filas leídas',rows.length],['Filas excluidas (cliente genérico o vacío)',skipName],['Filas sin fecha válida',skipDate],['Total de clientes identificados',totAll],['Clientes en esta lista',view().length],['Suma de '+(pg?'Pagos':'Venta')+' de todas las filas',Math.round((qa.tp||0)*100)/100]]}
+function one(a,b){var la=a.length,lb=b.length,t,i=0;if(la<lb){t=a;a=b;b=t;la=a.length;lb=b.length}if(la-lb>1)return false;while(i<lb&&a[i]===b[i])i++;if(la===lb){i++;while(i<lb&&a[i]===b[i])i++;return i>=lb}i++;while(i<lb&&a[i]===b[i-1])i++;return i>=lb}
+function nearDup(){
+  var ks=Object.keys(cli).filter(function(k){return k.length>=8}),g={},out=[];
+  ks.forEach(function(k){var p=k.slice(0,3);(g[p]||(g[p]=[])).push(k)});
+  for(var b in g){var a=g[b];for(var i=0;i<a.length;i++)for(var j=i+1;j<a.length;j++){
+    if(Math.abs(a[i].length-a[j].length)>1||!one(a[i],a[j]))continue;
+    var x=Object.keys(cli[a[i]].c),y=Object.keys(cli[a[j]].c);
+    if(x.length&&y.length&&!x.some(function(c){return y.indexOf(c)>-1}))out.push([cli[a[i]].n,x.join(', '),cli[a[j]].n,y.join(', ')])}}
+  modalOpen('<h2 style="margin:0 0 4px;padding-right:44px">Nombres casi iguales con códigos distintos</h2><p class="note" style="margin:0 0 12px">'+fm(out.length)+' parejas con una letra de diferencia (se muestran hasta 300). Revisa si son la misma persona.</p><div class="tw"><table><thead><tr><th>Cliente A</th><th>Códigos A</th><th>Cliente B</th><th>Códigos B</th></tr></thead><tbody>'+(out.slice(0,300).map(function(o){return '<tr><td>'+esc(o[0])+'</td><td class="cd">'+esc(o[1])+'</td><td>'+esc(o[2])+'</td><td class="cd">'+esc(o[3])+'</td></tr>'}).join('')||'<tr><td colspan="4">No se encontraron.</td></tr>')+'</tbody></table></div>');
+}
+function recon(){
+  var pg=idx.pg>=0,tp=0,neg=0,zero=0,sci=0,ced=0,tel=0,i,r,v,c;
+  for(i=0;i<rows.length;i++){r=rows[i];v=pg?nv(r,idx.pg):nv(r,idx.a);tp+=v;
+    if(v<0||(idx.q>=0&&nv(r,idx.q)<0))neg++;else if(v===0)zero++;
+    if(idx.ce>=0){c=gv(r,idx.ce);if(c){ced++;if(/^\d+([.,]\d+)?e[+-]?\d+$/i.test(c))sci++}}
+    if(idx.tl>=0&&gv(r,idx.tl))tel++}
+  var ks=Object.keys(cli),multi=0,lg=0;
+  ks.forEach(function(k){var cs=Object.keys(cli[k].c);if(cs.length>1)multi++;if(cs.length){var m=cs.reduce(function(a,b){return b.length<a.length?b:a});if(m.length>=9)lg++}});
+  qa={tp:tp};
+  var p=function(n,d){return d?(n/d*100).toFixed(1)+'%':'—'},it=function(b,s,w){return '<div'+(w?' class="w"':'')+'><b>'+b+'</b><span>'+s+'</span></div>'},lb=pg?'Pagos':'Venta';
+  $('recon').innerHTML='<div class="rc">'+
+   it(fm(rows.length),'filas leídas')+
+   it(fm(skipName)+' ('+p(skipName,rows.length)+')','excluidas por cliente genérico o vacío')+
+   it(fm(skipDate),'sin fecha válida',skipDate>0)+
+   it(fm(recs.length),'filas usadas en el análisis')+
+   it('L '+fm(tp,2),'suma de '+lb+' de todas las filas')+
+   it(fm(neg),'líneas negativas (posibles devoluciones)',neg>0)+
+   it(fm(zero),'líneas con '+lb+' en cero')+
+   it(fm(ks.length),'clientes distintos (unidos por nombre)')+
+   it(fm(multi),'clientes con varios códigos',multi>0)+
+   it(fm(lg)+' ('+p(lg,ks.length)+')','con código de 9+ dígitos (posible alta en caja)')+
+   (idx.ce>=0?it(fm(sci)+' ('+p(sci,ced)+')','cédulas en notación científica (inservibles)',sci>0):'')+
+   (idx.tl>=0?it(fm(tel),'filas con teléfono'):'<div class="w"><b>Sin teléfono</b><span>el archivo no trae columna de teléfono</span></div>')+
+   '</div><div class="row" style="margin-top:12px"><button id="near">Buscar nombres casi iguales con códigos distintos</button></div><p class="note">Compara la suma de '+lb+' con el total del sistema. Sin líneas negativas, confirma que el reporte excluye devoluciones: una devolución contada como visita inflaría las visitas.</p>';
+  $('near').onclick=nearDup;
+}
+
 var tm;function later(){clearTimeout(tm);tm=setTimeout(calc,250)}
 
 
@@ -434,23 +620,23 @@ function modalClose(){$('modal').classList.add('hide');document.body.style.overf
 function modalOpen(h){$('mbody').innerHTML=h;$('modal').classList.remove('hide');$('mbody').scrollTop=0;document.body.style.overflow='hidden'}
 function gv(w,i){return i>=0&&w[i]!=null?String(w[i]).trim():''}
 function nv(w,i){return i>=0?num(w[i]):0}
-function getLines(key){
-  var o=[];
-  for(var j=0;j<recs.length;j++){var r=recs[j];if(r.k!==key)continue;var w=rows[r.i];
+function getLines(key,src){
+  var o=[];src=src||recs;
+  for(var j=0;j<src.length;j++){var r=src[j];if(r.k!==key)continue;if((src===recsB?adB:adA)&&!r.ad)continue;if(!tmOk(r,$(src===recsB?'tmB':'tmA').value))continue;var w=rows[r.i];
     o.push({t:r.t,b:r.b,u:r.u,v:r.a,f:gv(w,idx.f),p:gv(w,idx.p),c:gv(w,idx.cat),cd:gv(w,idx.cd),tp:gv(w,idx.tp),q:nv(w,idx.q),pr:nv(w,idx.pr),ds:nv(w,idx.ds),pg:nv(w,idx.pg)})}
   o.sort(function(a,b){return b.t-a.t});
   return o;
 }
-function openClient(key){
+function openClient(key,br){
   var c=result.filter(function(x){return x.key===key})[0];
-  cur={key:key,name:c?c.nombre:key,l:getLines(key),tab:'c',code:c&&c.codigo?c.codigo:''};
+  cur={key:key,name:c?c.nombre:key,l:getLines(key),tab:'c',br:br||'',code:c&&c.codigo?c.codigo:''};
   showClient('c');
 }
 function showClient(tab){
-  var L=cur.l,fs={},tv=0;
-  L.forEach(function(x){fs[x.f||x.t]=1;tv+=x.v});
-  var h='<h2 style="margin:0 0 4px;padding-right:44px">'+esc(cur.name)+'</h2><p class="note" style="margin:0 0 12px">'+(cur.code?'Código '+esc(cur.code)+' · ':'')+fm(Object.keys(fs).length)+(Object.keys(fs).length===1?' factura · ':' facturas · ')+fm(L.length)+(L.length===1?' línea de producto · ':' líneas de producto · ')+fm(tv,2)+' en compras</p>';
-  h+='<div class="row tabs" style="margin-bottom:12px"><button data-act="tab" data-t="c" class="'+(tab==='c'?'on':'')+'">Compras</button><button data-act="tab" data-t="p" class="'+(tab==='p'?'on':'')+'">Productos que más compra</button></div>';
+  var L=cur.br?cur.l.filter(function(x){return x.b===cur.br}):cur.l,fs={},tv=0;
+  L.forEach(function(x){fs[x.f||x.t]=1;tv+=(idx.pg>=0?x.pg:x.v)});
+  var h='<h2 style="margin:0 0 4px;padding-right:44px">'+esc(cur.name)+(cur.br?' <span class="bchip">'+esc(blabel(cur.br))+'</span>':'')+'</h2><p class="note" style="margin:0 0 12px">'+(cur.code?'Código '+esc(cur.code)+' · ':'')+fm(Object.keys(fs).length)+(Object.keys(fs).length===1?' factura · ':' facturas · ')+fm(L.length)+(L.length===1?' línea de producto · ':' líneas de producto · ')+fm(tv,2)+' en compras</p>';
+  h+='<div class="row tabs" style="margin-bottom:12px"><button data-act="tab" data-t="c" class="'+(tab==='c'?'on':'')+'">Compras</button><button data-act="tab" data-t="p" class="'+(tab==='p'?'on':'')+'">Productos que más compra</button>'+(cur.br?'<button data-act="allb">Ver compras en todas las sucursales</button>':'')+'</div>';
   if(tab==='c'){
     var I={},ord=[];
     L.forEach(function(x){var k=x.f||('s'+x.t);if(!I[k]){I[k]={f:x.f,t:x.t,n:0};ord.push(k)}I[k].n++});
@@ -458,9 +644,9 @@ function showClient(tab){
       return '<tr><td>'+fmtD(new Date(e.t))+'</td><td>'+(e.f?'<a href="#" class="lk" data-act="fac" data-f="'+esc(e.f)+'">'+esc(e.f)+'</a>':'—')+'</td><td>'+fm(e.n)+(e.n===1?' producto':' productos')+'</td></tr>'}).join('')+'</tbody></table></div>';
   }else{
     var G={};
-    L.forEach(function(x){var e=G[x.p]||(G[x.p]={p:x.p,fs:{},q:0,v:0,t:0});e.fs[x.f||x.t]=1;e.q+=x.q;e.v+=x.v;if(x.t>e.t)e.t=x.t});
+    L.forEach(function(x){var e=G[x.p]||(G[x.p]={p:x.p,fs:{},q:0,v:0,t:0});e.fs[x.f||x.t]=1;e.q+=x.q;e.v+=(idx.pg>=0?x.pg:x.v);if(x.t>e.t)e.t=x.t});
     var A=Object.keys(G).map(function(k){var e=G[k];e.n=Object.keys(e.fs).length;return e}).sort(function(a,b){return b.n-a.n||b.v-a.v});
-    h+='<div class="tw"><table><thead><tr><th>Producto</th><th>Veces comprado</th><th>Cant. total</th><th>Venta</th><th>Última compra</th></tr></thead><tbody>'+A.map(function(e){
+    h+='<div class="tw"><table><thead><tr><th>Producto</th><th>Veces comprado</th><th>Cant. total</th><th>'+(idx.pg>=0?'Pagos':'Venta')+'</th><th>Última compra</th></tr></thead><tbody>'+A.map(function(e){
       return '<tr><td>'+esc(e.p)+'</td><td class="n">'+fm(e.n)+'</td><td class="n">'+fm(e.q)+'</td><td class="n">'+fm(e.v,2)+'</td><td>'+fmtD(new Date(e.t))+'</td></tr>'}).join('')+'</tbody></table></div>';
   }
   cur.tab=tab;modalOpen(h);
@@ -471,14 +657,14 @@ function showInvoice(f){
   var h='<button data-act="back" style="margin-bottom:10px">← Volver a las compras</button><h2 style="margin:0 0 4px;padding-right:44px">Factura '+esc(f)+'</h2><p class="note" style="margin:0 0 12px">'+esc(cur.name)+' · '+fmtD(new Date(x0.t))+(x0.b?' · '+esc(x0.b):'')+(x0.u?' · Usuario Factura: '+esc(x0.u):'')+(x0.tp?' · '+esc(x0.tp):'')+'</p>';
   h+='<div class="tw"><table><thead><tr><th>Código</th><th>Producto</th><th>Subcategoría</th><th>Cant.</th><th>Precio</th><th>Descuentos</th><th>Venta</th><th>Pagos</th></tr></thead><tbody>'+L.map(function(x){
     return '<tr><td>'+esc(x.cd)+'</td><td>'+esc(x.p)+'</td><td>'+esc(x.c)+'</td><td class="n">'+fm(x.q)+'</td><td class="n">'+fm(x.pr,2)+'</td><td class="n">'+fm(x.ds,2)+'</td><td class="n">'+fm(x.v,2)+'</td><td class="n">'+fm(x.pg,2)+'</td></tr>'}).join('')
-    +'</tbody><tfoot><tr><td colspan="3">Total ('+fm(L.length)+' productos)</td><td class="n">'+fm(T.q)+'</td><td></td><td class="n">'+fm(T.ds,2)+'</td><td class="n">'+fm(T.v,2)+'</td><td class="n">'+fm(T.pg,2)+'</td></tr></tfoot></table></div>';
+    +'</tbody><tfoot><tr><td colspan="3">Total ('+fm(L.length)+(L.length===1?' producto':' productos')+')</td><td class="n">'+fm(T.q)+'</td><td></td><td class="n">'+fm(T.ds,2)+'</td><td class="n">'+fm(T.v,2)+'</td><td class="n">'+fm(T.pg,2)+'</td></tr></tfoot></table></div>';
   modalOpen(h);
 }
-$('tbody').addEventListener('click',function(e){var a=e.target.closest('a.lk');if(!a)return;e.preventDefault();openClient(a.dataset.k)});
+$('tbody').addEventListener('click',function(e){var bb=e.target.closest('a.lkb');if(bb){e.preventDefault();openClient(bb.dataset.k,bb.dataset.b);return}var a=e.target.closest('a.lk');if(!a)return;e.preventDefault();openClient(a.dataset.k)});
 $('mbody').addEventListener('click',function(e){
   var a=e.target.closest('[data-act]');if(!a)return;e.preventDefault();
   var act=a.dataset.act;
-  if(act==='fac')showInvoice(a.dataset.f);else if(act==='tab')showClient(a.dataset.t);else if(act==='back')showClient(cur.tab);
+  if(act==='fac')showInvoice(a.dataset.f);else if(act==='tab')showClient(a.dataset.t);else if(act==='back')showClient(cur.tab);else if(act==='allb'){cur.br='';showClient(cur.tab)}
 });
 $('mclose').onclick=modalClose;
 $('modal').addEventListener('click',function(e){if(e.target===this)modalClose()});
@@ -493,13 +679,19 @@ $('drop').addEventListener('drop',function(e){if(e.dataTransfer.files[0])readFil
 $('branchF').onchange=calc;
 $('usuarioF').onchange=calc;
 $('teF').onchange=calc;
+$('fit').onclick=function(){var on=document.body.classList.toggle('fit');this.classList.toggle('on',on)};
 $('chips').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;$('days').value=b.dataset.d;calc()});
 $('colbox').addEventListener('change',function(e){var k=e.target.dataset.c;if(!k)return;hid[k]=!e.target.checked;applyCols();render()});
-$('modeF').onchange=calc;
-$('dfmt').onchange=function(){if(!rows.length)return;buildRecs();if(recs.length){$('ref').value=iso(maxD);calc()}else{$('err').textContent='Con este formato no se leyeron fechas válidas.'}};
+function tmLbl(v){return !v?'Todos':v==='_'?'Sin clasificar':v}
+$('tmA').onchange=calc;$('tmB').onchange=calcB;
+function adSet(){$('adA').setAttribute('aria-pressed',adA?'true':'false');$('adB').setAttribute('aria-pressed',adB?'true':'false')}
+$('adA').onclick=function(){if(!adA&&!nAd){alert('No encontré productos que contengan la palabra Adiuvo en la columna de producto.');return}adA=!adA;adSet();calc()};
+$('adB').onclick=function(){if(!adB&&!nAd){alert('No encontré productos que contengan la palabra Adiuvo en la columna de producto.');return}adB=!adB;adSet();calcB()};
+$('modeF').onchange=calc;$('exneg').onchange=calc;
+$('dfmt').onchange=function(){if(!rows.length)return;buildRecs();if(recs.length){$('ref').value=iso(maxD);recon();buildB();calc()}else{$('err').textContent='Con este formato no se leyeron fechas válidas.'}};
 $('q').oninput=function(){shown=300;render()};
 $('more').onclick=function(){shown+=500;render()};
-$('csv').onclick=function(){save('clientes_no_retornaron.csv',toCSV(matrix()),'text/csv;charset=utf-8')};
+$('csv').onclick=function(){var m=matrix(),tj=[];cols.forEach(function(c,j){if(c[0]==='ce'||c[0]==='tl'||c[0]==='codigo')tj.push(j)});for(var i=1;i<m.length;i++)tj.forEach(function(j){var v=String(m[i][j]);if(/^\d{6,}$/.test(v)||/^0\d+$/.test(v))m[i][j]='="'+v+'"'});save('clientes_no_retornaron.csv',toCSV(m),'text/csv;charset=utf-8')};
 $('xlsx').onclick=function(){
   if(typeof XLSX==='undefined'){alert('No se pudo cargar la librería de Excel (necesita internet). Usa Descargar CSV: se abre directo en Excel.');return}
   try{
@@ -509,16 +701,189 @@ $('xlsx').onclick=function(){
     for(i=1;i<m.length;i++){
       if(dj>=0){var a1=ws[XLSX.utils.encode_cell({r:i,c:dj})];if(a1)a1.z='dd/mm/yyyy'}
       if(mj>=0){var b1=ws[XLSX.utils.encode_cell({r:i,c:mj})];if(b1)b1.z='#,##0.00'}
+      cols.forEach(function(c,j){if(c[0]==='ce'||c[0]==='tl'||c[0]==='codigo'||c[0]==='todos'){var t1=ws[XLSX.utils.encode_cell({r:i,c:j})];if(t1){t1.t='s';t1.v=String(t1.v);t1.z='@'}}});
     }
     ws['!cols']=m[0].map(function(h,j){var w=String(h).length;for(var k=1;k<Math.min(m.length,300);k++){var l=String(m[k][j]).length;if(l>w)w=l}return{wch:Math.min(Math.max(w+2,10),50)}});
     ws['!autofilter']={ref:ws['!ref']};
-    var wb2=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb2,ws,'No retornaron');
+    var wb2=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb2,ws,'No retornaron');var wp=XLSX.utils.aoa_to_sheet(params());wp['!cols']=[{wch:44},{wch:42}];XLSX.utils.book_append_sheet(wb2,wp,'Parámetros');
     save('clientes_no_retornaron.xlsx',XLSX.write(wb2,{bookType:'xlsx',type:'array'}),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   }catch(x){alert('No se pudo generar el Excel: '+x.message+'. Usa Descargar CSV.')}
 };
 $('copy').onclick=function(){var t=matrix().map(function(r){return r.join('\t')}).join('\n'),b=$('copy');
   (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){b.textContent='¡Copiado!'},function(){b.textContent='No se pudo copiar'});
   setTimeout(function(){b.textContent='Copiar'},1800)};
+/* ===== Hoja 2: créditos e instituciones ===== */
+var TMC={"Consumo":"9474,9404,10827,16850,10754,12080,10961,19524,20693,10968,13026,16840,17360,17671,17672,17545,15277,19204,19205,21413,19203,10805,12034,12035,10806,21853,10467,10612,10803,10415,9322,13006,11506,10918,10919,20398,8732,11880,11879,11610,12896,12895,13014,21088,13012,13013,21090,11554,16815,21201,21529,17426,21202,11612,21340,11271,9353,12570,12576,10267,16817,21956,11255,21261,8930,16837,13448,11627,8879,11132,16818,10545,16051,16049,10408,10410,16050,10407,10409,16811,9387,9290,16448,16420,10475,9951,12589,12580,12583,19359,9478,13812,12584,12585,17591,21231,21412,21580,11509,11515,11511,11507,11510,11514,11508,21230,12587,10411,12930,11183,11460,10436,11466,10435,12037,13440,21849,11474,13439,21953,10810,21702,8975,13001,11366,21577,10028,11361,11363,11364,19135,19221,11352,10972,16823,15881,10543,12130,19436,11620,19332,21142,10413,10414,10962,20002,11821,11819,11822,11820,11266,11270,11345,11341,11347,11343,11348,11344,10967,10316,8987,11431,15135,15136,15133,15134,15010,13352,12983,12984,12986,10262,10472,11258,11257,8928,11453,13276,19033,20696,11545,19137,21732,21104,16052,15276,11136,19108,19809,10223,10963,11282,11283,11293,11294,11295,13093,13029,10483,11614,8787,21409,21411,21095,15897,15899,15898,21225,13021,12256,12255,19434,11349,10313,19433,10314,19443,13913,17559,15596,9370,9051,13975,13384,11728,15564,21251,10162,24086,19585,19584,19236,20699,18522,18521,18524,18525,18523,18527,18526,18528,14639,21958,15279,15280,15281,10269,15282,10266,19325,9308,9319,12039,17695,10823,10822,10824,13458,19245,10825,9392,21263,17679,12953,21217,9415,9420,9424,9425,11333,10965,9943,20121,17499,22038,22853,11198,20103,375,376,24491,19743,6530,6678,6677,874,22493,22497,22495,11212,17167,6554,15962,14566,18844,17897,22728,22730,23596,16917,19144,8632,8633,15861,17932,17933,9686,20942,20943,20944,5932,2783,17699,22734,22739,22744,17071,21045,8803,13271,6075,2019,1937,18061,3669,22559,6247,23059,7620,1745,288,383,22747,22749,17396,17397,19971,18792,17835,20947,8111,4138,24870,9752,9753,4607,903,902,19965,22763,19808,20946,1410,24930,727,20490,297,16864,7520,4913,3230,3231,3232,4030,23715,1627,1629,1369,3277,4865,6944,24382,3072,20133,11033,891,23007,19637,9809,21324,21323,24454,386,24453,2532,17258,23043,10112,10114,10109,10108,10110,24699,16816,13465,10613,17568,24696,22442,24698,10115,12933,10107,23150,19282,16657,22619,22618,11128,8931,11131,21098,10484,13453,23100,9458,4953,6626,4959,4954,4952,1352,20588,20589,21679,8010,3567,17231,21082,21008,21252,21845,12344,15922,14078,15927,2169,2917,13803,2170,13802,8566,10437,21728,21521,21402,13969,21520,21403,8743,10549,23476,22562,22551,22557,18080,23159,14543,10561,11148,8142,8243,4483,3518,17814,11503,21010,20958,20704,20125,16208,16160,16096,3173,3583,12821,23949,23581,5086,3208,11324,15296,3383,16524,5261,23015,15544,1057,15895,22229,18335,12430,12431,1904,1901,16957,16612,16613,17014,9688,21735,22773,23661,23662,18791,23950,24842,24855,19820,18939,22774,12277,10203,16109,10199,10200,22443,12276,12275,10106,10201,10973,10202,9399,10447,21216,16822,10104,9383,20695,10046,16275,10204,17233,12281,12279,17787,15856,15857,19759,21600,20137,17018,20140,11495,21099,21100,13811,13809,13810,21101,10448,13446,17260,24831,23357,6170,1900,4649,7301,24938,17950,3183,3184,23765,13499,14253,3531,22023,14128,13645,17826,3529,13500,3533,7055,1760,13205,12496,12499,12498,12497,12518,12023,7462,1761,21842,10776,4350,14237,24478,14239,4433,23537,7464,2526,7552,19926,14530,8075,20307,20515,20253,15839,16859,16576,19705,22070,16623,22069,22068,16624,22071,16445,10449,23149,10263,10476,13070,13479,8891,17182,19297,11616,9463,9457,21692,20780,20319,23538,20145,20146,21873,18597,23153,23541,22106,22107,22109,18558,12085,12084,12083,9080,10807,14070,15920,10216,5186,5185,21406,20147,14630,18955,11450,9475,23502,12965,12963,12273,13434,12964,11909,12966,14567,17356,13442,8965,8955,21944,11403,11401,11402,21943,21942,21941,22160,13464,13463,10641,8943,17683,10085,22356,22355,22359,22358,22357,21376,14074,16968,10591,24814,24815,8536,23022,18759,723,9841,22778,19914,19854,22780,11615,22969,21850,22783,22784,20882,20881,20883,22602,22603,22601,20879,24369,24370,24956,24368,20884,20885,22604,24957,24954,24955,20880,2315,24537,24536,24538,14553,24639,15468,23489,19562,7288,11907,3703,2796,20831,24400,24847,18869,2186,19592,13897,10624,20285,20286,10656,10654,10655,10657,24531,22376,18106,11953,24566,24565,24564,24563,12917,12927,12928,12929,20196,20899,20199,20198,15885,17722,21047,23025,5375,10629,8738,11897,8559,23905,23904,6957,23903,7709,7707,21222,21223,16304,8919,4430,3497,3036,16183,11776,22700,22701,22478,20375,20614,20613,24391,18017,19961,11323,6206,24339,21979,1726,21194,11137,22144,22146,22143,12925,24361,11464,11459,11461,11463,11462,11468,11465,11476,10809,10811,22512,16108,23504,11472,11478,21704,21703,22111,11368,24362,24554,24553,8978,11350,19134,19130,12967,19222,12974,11356,22032,12968,12969,12975,11389,11386,20159,20158,11497,10260,12923,16972,11390,11392,11393,11489,11471,10257,11539,11537,12926,21755,10747,21531,19703,20590,22307,23901,4068,24357,24462,8415,15523,22686,22687,22688,21905,4309,14660,12143,9554,4128,22206,24856,20252,16271,16270,21804,17458,8076,8849,3436,14332,3438,23868,24685,17939,17748,2349,7165,17065,2581,16636,13667,11629,11628,8078,8864,24609,24608,6394,6395,6390,12653,12656,20011,20012,8060,24543,5030,12031,21139,20900,13780,23006,20023,17704,14591,14590,14589,2697,24819,21052,12910,17393,17394,561,12213,10477,19346,8281,15157,6992,21312,8077,6993,11252,11251,13391,23436,17781,23925,22051,21020,21021,21019,21079,21017,20265,23641,24881,22231,22232,5433,9605,20972,20647,15408,24315,9647,19960,20328,9604,9603,24871,24908,24575,24549,8189,11644,6586,22916,19181,22914,22915,20046,19567,22223,22224,19568,19569,21885,17510,17511,17512,11883,14933,24408,16529,16953,14095,16251,16528,21987,17548,17440,24975,24428,7322,24336,24872,24892,24877,24878,21985,23634,7361,21984,7066,21909,7067,24974,23712,11621,21498,24421,18823,13023,22547,4393,24016,21887,16880,16161,23619,9689,23086,14571,21432,22019,22018,9110,5147,12901,12900,16282,16283,16284,21159,20759,23230,9939,13053,9455,22555,16272,22790,22792,15173,1238,6396,21876,24587,23780,24781,24780,18811,18812,24184,24411,24464,24410,23921,23610,22505,16379,17760,24903,24902,17759,17761,17762,23920,22011,22504,16383,22503,16368,24588,23316,20560,23317,20562,23319,23470,24787,22502,16372,16373,22012,20559,16382,23315,23318,24784,24782,24783,23469,23468,23779,23320,19966,21695,16374,18563,18567,21057,18566,23556,23565,14954,16250,20429,21450,19591,19678,19679,15756,23884,23885,23886,23887,24379,3253,20345,12870,21178,21318,17184,16883,15858,15859,15860,22794,17075,16663,21165,21785,22058,24459,9851,8649,4923,24178,24234,24177,24179,24180,24547,24183,22996,24835,24701,23521,24375,22587,14319,14574,14573,20934,22171,13240,17977,4639,7182,24508,19732,24255,16803,17185,17186,16233,22796,16611,21746,16806,22799,17076,17077,17078,17079,17080,17082,16858,17083,17084,16163,12871,11410,11411,11409,16008,2618,15248,4586,22805,22810,16031,2474,1026,14705,8313,15372,15382,15511,5781,7408,254,18352,15915,17296,4290,18313,22465,12944,24929,4696,684,716,24940,16032,683,13587,20368,13224,18948,689,688,21155,14811,14812,14818,14810,21474,21475,23039,23042,23128,8770,16340,18754,11316,2453,14584,14583,14585,7955,13152,15069,7535,7534,7536,5904,4741,4740,6780,7351,7350,7348,7333,7345,7335,8656,7331,9578,6272,14075,24562,24561,24560,24559,24558,24557,22364,4031,21378,24598,13856,11940,20246,14685,3506,19728,19725,19726,19724,19727,19729,20974,20975,20976,20977,20978,15265,11265,11818,11267,11268,11269,6552,3298,6795,24496,24497,24498,5196,16013,18116,19311,19290,10265,11617,12860,24969,21807,12489,12500,16287,23441,16751,23748,22217,19897,18334,17177,23503,15919,23033,22114,21967,21123,17392,20122,21656,12342,10840,4960,6743,15911,11263,17421,24037,24690,16975,1643,20054,11456,11457,13383,11458,10717,10713,11419,11421,22158,1724,1722,1723,23021,20303,17395,2706,15011,12982,24237,24108,24064,12985,24097,18601,18599,22321,19500,19501,4515,21477,22488,12003,12830,24424,17335,17332,17354,17336,17688,17685,17686,23221,23220,17947,17333,17334,17687,17690,17337,17689,1960,23720,24862,23716,23821,23717,22644,23631,23632,23723,24433,23912,23718,24590,24897,24692,23822,23719,24292,11941,2684,7548,14270,2591,2590,5174,2882,2906,14675,16185,18423,14613,15295,7918,6712,24176,22059,17516,17517,17518,12188,23588,20911,21053,24738,17051,24373,22481,13080,8773,24139,7315,24138,6551,23011,20998,17112,21808,17114,11259,11763,12858,20107,11200,11201,11199,5473,10725,11190,2696,13430,16289,17713,19814,5655,17020,19935,19815,2448,16290,17714,19816,5605,20289,14180,14181,20984,20985,20986,7711,22831,22832,19688,19687,21262,23123,23119,12298,23115,23125,23122,22660,21087,23045,21253,15783,15784,24548,3019,21686,6135,24325,24461,23627,24288,24614,24864,24771,24865,24460,24772,14336,12565,6998,14248,24275,24276,24274,24502,24495,24494,24501,21782,13600,17569,17789,17790,13601,14331,22118,20903,19906,19903,6999,6995,6994,9748,7387,15785,17593,22683,13650,15896,23979,23977,24271,23630,23948,20347,24261,14083,6566,2232,16184,2480,5071,13916,20240,24007,17610,2496,15185,17415,13558,13559,13799,13800,15542,15543,17538,22989,13798,13797,15541,11444,22476,11443,22962,10759,22844,7640,6245,24624,24625,24623,24622,24620,24621,2129,20152,23151,11493,13042,18610,12510,14173,24533,18140,20464,20465,6730,6822,22918,24808,24809,24805,24810,24807,24811,24135,20492,12876,17589,12158,24448,23111,12221,19642,23247,15204,24434,15201,11952,21106,13599,21105,20538,21594,5093,2217,23029,21841,4326,5774,24686,18064,23255,13924,23744,2045,23966,23957,3031,22957,17936,17240,16747,16902,17035,12885,12887,17614,16234,12884,18809,22817,17193,14703,17979,20212,24532,24676,16310,22094,17773,9628,19908,17970,19907,17971,15203,24499,24500,21422,13114,15360,24638,24631,24628,24632,24626,24630,24634,24636,24635,24627,24629,24637,11892,19829,19776,23569,23568,8940,14072,18046,22308,3621,2248,1863,2238,1698,24101,6054,11789,37,24102,2239,2249,2245,2247,3483,5929,24111,2240,2246,20697,21731,22110,10206,10440,10439,11546,15914,23570,21579,20694,21103,9403,21733,19769,19861,22859,21706,22112,11264,2814,11496,19218,19030,19031,11227,20692,11223,11228,11230,7033,8667,5480,6926,6443,21581,16563,16291,16746,5544,4231,5545,7761,16743,16562,8668,2439,5543,12368,22121,16292,16293,11942,2479,8666,21993,21992,23241,24052,21093,11622,21729,13017,23231,1309,7295,1307,6207,3614,12278,23455,6719,11939,8610,216,215,2690,14464,17136,16878,8524,8523,16906,16907,17137,12946,15827,17694,11762,21632,16809,16810,21633,12593,17611,12594,8856,16745,16255,21601,9961,11512,24697,12071,6314,10220,19123,10221,6393,19355,11284,11285,11286,11287,11288,21856,11289,11292,21141,11296,11297,14741,5365,5364,24778,24779,15591,14557,15590,14556,13082,10992,24467,13117,13139,7863,2731,14485,11441,11438,21274,12078,10045,11439,11974,11973,22165,17588,1700,1096,17053,7844,20607,13204,24576,17935,21875,23791,10660,10658,22218,11028,3340,19714,11686,15918,19656,24213,19865,22837,23236,23237,24040,2747,5175,18363,14364,15935,18880,18879,2419,10479,19310,10481,13480,18040,24854,14084,15913,19941,22917,20948,21377,10891,10892,11669,11480,3971,4259,4840,5782,22961,4262,4260,18989,17644,24970,14753,23946,12682,12681,12683,20747,22424,14081,22050,21375,10550,13443,198,22663,21233,6545,21532,19182,5277,14603,14605,14604,18975,12211,17824,17825,23842,10987,13346,21392,9008,8061,17647,9632,7821,21534,5982,5983,24522,24343,24523,24649,3140,15091,15090,15092,23732,24283,20132,19730,18142,4221,4074,494,493,9719,18752,18753,23692,4988,6344,18062,18063,4431,1179,1176,1177,15064,24200,23881,22680,24961,23598,1135,8788,9325,8869,10542,22923,21916,21917,21918,23614,21094,11568,10264,14901,14900,13020,22558,22561,24687,4418,8273,22821,22822,20491,20937,20940,20938,11775,24118,24117,1687,23992,15013,10960,10024,13002,18977,3172,5476,3052,2826,2830,2831,3053,5202,5772,5773,22975,10647,10649,10652,10645,10646,11479,15551,3862,22072,19972,2588,19827,22182,21162,21160,21161,21509,21481,21471,19913,19872,21565,21480,19864,19818,20438,22823,19750,19791,9343,19794,4881,16881,19496,19497,6745,16882,12875,10625,19912,20786,17723,21294,19873,22824,21928,2749,22510,22511,21320,24868,13322,20272,18707,18708,18966,24002,24818,18071,15816,16211,21280,21281,16798,16227,21284,16218,21283,17073,20482,21286,22737,23850,23849,12879,21290,22736,23138,16220,17385,11069,18634,14917,10076,12186,24359,21333,1661,500,1459,24267,499,2065,488,9731,21255,21256,24004,15081,21206,6192,687,4587,800,21934,3978,21877,21163,24094,178,21389,21712,2844,18486,22120,5409,17680,15886,23659,7503,20426,14984,18228,14709,11943,5925,24836,15330,20844,20529,15869,24307,24432,24384,15870,24920,15214,15213,13968,22967,11619,23146,22692,16167,15841,16224,19749,20720,24960,23037,16095,24420,17420,12886,18815,17389,9696,9432,12299,15862,17387,17388,19752,15865,18741,9697,462,24175,8166,8178,8179,20260,22613,9286,9562,20261,22073,18598,24152,9564,20262,17531,9658,15350,15351,23764,9664,16557,24764,24556,24024,20039,4256,7014,23882,24344,24711,21693,16807,24322,23710,9698,17085,9700,13071,24535,10742,10614,7188,20904,18054,10452,20919,13157,13154,10453,16254,18055,12185,21305,13156,13155,13159,13153,18654,18656,18660,18659,15078,18658,18657,11247,1160,1161,2083,20000,23917,17749,15480,5357,24018,23852,11232,15833,23853,11233,15834,21373,13069,12991,12992,12993,12994,24444,5103,9349,18087,16278,24846,4065,1639,20768,6933,23525,1440,20626,1423,1477,22600,7836,18003,22711,15880,18032,8421,24187,23344,12987,12988,24238,11253,16157,23854,21404,9068,24750,24751,12990,22037,12209,15584,15583,20554,15582,14554,15586,17358,24785,24786,20556,22646,9354,9352,22902,14474,14473,15589,15587,15593,22669,14863,8958,1959,1936,7712,10925,12635,12453,22483,18274,18263,3738,2828,2829,14068,6557,14069,8681,24893,464,463,13965,13964,13955,13963,13974,9003,9565,14487,22477,23832,23708,22598,22593,22590,22594,22597,22596,22592,22591,22595,19533,19534,9566,21448,1319,18853,15423,16829,16830,1331,23077,17696,7837,11317,9027,22240,23513,23512,23514,23511,24304,23519,21212,14435,14189,11300,11301,20257,12241,15237,16964,12301,16965,20520,7484,7483,7481,7482,8311,8262,24735,7475,21978,7477,21203,8261,8159,8160,11052,11051,11384,24675,22864,11551,19812,24277,23789,22940,11552,16608,13970,23604,15163,8052,24853,24463,17352,24578,24861,23824,24773,23952,14808,14809,14916,18333,21768,23648,23649,23652,24019,23657,23658,14623,15165,17156,17157,21838,17898,20829,24418,20180,21708,14764,12356,24003,6676,7123,22665,21741,16203,15234,18321,14129,24268,13694,21036,14939,24612,24613,24056,15560,17338,20485,15570,20792,19494,24119,24120,24123,20790,20793,17340,17575,15561,21516,12997,15569,20791,20789,16604,24247,15563,21515,17681,19495,18481,15573,23447,10354,24121,24124,24122,16265,16268,23688,16525,16266,16267,13410,19958,24290,24329,17648,22754,1866,14624,5290,15968,15975,24053,23589,5051,20109,9244,3454,19999,17188,13590,14124,20896,10243,11447,11445,24952,24953,15850,24615,4421,17630,21524,17632,16540,21523,23775,20130,20866,20268,21528,20129,19997,23633,16547,18408,18409,18407,21218,16544,6087,20907,20906,21711,20908,10242,15884,10245,10244,23229,23228,23227,9442,10166,10163,9428,10165,9429,10164,9443,9441,22642,22175,22174,22212,22213,19859,20841,17409,17405,18421,16306,16305,16308,16307,17486,17401,17816,24705,24706,24087,13008,13009,13010,24088,19237,9472,11932,23827,23918,23628,23825,24287,15012,17284,11262,24737,24736,20563,12956,5471,16956,5475,15923,22113,22589,12079,17416,22944,22943,12881,17259,16362,1503,18650,17143,18649,21890,11781,20443,11782,11783,18652,23787,24905,24904,18780,24661,18781,18782,24682,18783,18784,18785,18786,24528,24527,18769,24763,18760,24405,20857,11133,11134,16112,19350,19280,17934,15971,22645,22678,19444,9728,9727,2062,2063,2804,24611,10846,795,18925,796,16661,6003,4154,4311,6410,5139,5966,11208,11210,11211,11207,11206,11205,11204,11209,23081,13142,20726,2002,2003,17769,10482,14659,3199,3198,15777,17797,18353,15781,17796,15779,15780,17793,15776,10487,16946,22757,22758,15932,2110,2131,24262,2231,7845,22759,21646,21647,21648,16577,16578,22760,12872,12873,12874,15853,15854,22052,19530,15093,15095,24219,6917,14752,20532,11053,16848,13445,13444,13438,22548,11613,7056,24110,5855,151,21176,19553,8316,24654,20979,16392,9487,8980,13054,13056,13004,10544,6105,17418,8837,10995,24510,24511,24509,20617,19643,19641,6236,8382,20494,16574,23767,11624,20587,19689,9959,9960,19686,19690,9332,17592,22568,16866,12894,9638,9468,16979,13941,23487,7561,20225,20860,21929,4623,10753,7587,18332,20424,15824,15823,21847,4624,18569,22039,14443,15240,22766,17257,18058,22881,15387,10056,10055,10054,20160,10058,20161,10057,21235,21234,603,3871,24257,14061,19909,22895,23721,17766,13057,13058,24480,17126,13060,17764,8808,20688,10160,7236,20047,20048,23095,22945,20396,15314,24312,24311,24449,4214,19691,20003,21133,19870,18604,6130,5214,10082,10084,10081,12172,7521,7525,15025,20139,19692,18342,13003,10009,20242,19693,19770,13478,18850,18851,19525,15096,5513,20602,9845,24642,22650,24401,24402,24913,2601,15722,15728,18203,22278,22047,22044,22043,22046,22045,22049,23506,10813,17884,17885,12475,15084,22775,18013,18011,18012,2720,16225,16168,16169,16226,16560,16356,16559,7693,7692,7691,7694,15875,15874,16627,17596,17355,16628,19142,18695,22777,19694,9702,10238,10237,10236,11918,14448,14447,2166,18500,18501,22965,22006,7013,8968,8969,8966,10335,12962,9234,21878,4437,12334,20770,23786,602,6150,8208,6151,20603,20941,19927,19841,22779,16077,14610,14611,16812,5905,4002,5437,5438,20570,7831,7776,8086,7765,23524,7817,24241,7775,14844,8087,23364,15977,7736,7735,23367,7798,20571,7794,7764,23366,7806,14840,14841,23368,14858,8428,20203,20202,20205,20204,24364,24363,6107,24429,24430,21555,10937,18878,14425,23223,17573,24774,109,16066,22900,18570,20825,21895,12947,2458,12317,2457,20206,20208,20207,21518,21488,8185,8183,24909,23130,12597,14251,14983,24927,24943,20668,20667,18552,17373,9940,12646,24366,18036,18041,16969,5141,20350,9464,21092,23071,17190,22972,16294,24286,16295,13019,22968,15849,10478,4241,19212,19213,23154,11543,11682,10726,10729,23031,22898,17343,17346,16552,21851,16521,22514,10087,17344,19489,9090,23509,19491,24055,24054,9469,13806,13808,15892,15891,22960,15889,9405,15888,15887,11492,11449,9477,12081,11428,11427,20150,20148,22441,13460,10252,10251,10489,22053,11194,23507,23508,21379,21691,23132,23133,13429,16006,16005,3932,17192,16264,20213,8051,23819,23835,23830,23831,18434,23858,18381,23834,18382,22445,12632,12364,8911,23060,10913,24984,18383,18384,18385,13742,14432,20778,24519,24520,24521,15485,15390,22785,22787,22789,18278,24505,3874,8102,2450,24866,23061,1540,19327,20385,12889,15484,18059,6441,6440,6439,6438,6442,11730,21707,19957,22791,21701,15546,15547,15548,15545,15537,15483,21211,5879,16618,17152,14131,20821,18052,18445,14618,24912,24403,24399,24911,11574,10403,10426,23505,12038,10042,13899,9802,4161,4615,23226,4160,10557,10417,16781,4086,2411,23475,20826,24105,13905,24104,24552,24616,24550,24551,6470,18584,18763,22352,18762,3475,2667,6817,2666,6595,6471,7547,2664,3390,3391,18764,2662,2663,3598,18532,3644,24107,24106,8406,2665,8756,18264,14670,14668,14669,5009,24869,24917,11590,24591,24922,11592,11591,24593,24923,24924,24925,24926,24592,11626,19995,13217,1380,17229,12234,17230,1384,18151,3570,3572,1382,1383,5474,3880,127,579,9533,4695,12064,12063,15902,23096,21126,21125,21124,8209,23520,5115,16111,14445,6632,14845,2047,22938,22939,11009,9031,13413,22475,24745,20018,5020,24301,10936,23856,9774,1414,23703,14743,13435,23152,11426,20142,13468,15893,9473,8818,21407,22983,22329,22328,13476,11050,11049,11383,11382,22327,19681,19682,20463,16660,4366,22971,23750,23358,475,18391,7193,8039,6674,8408,14103,21949,24873,21948,22951,10774,2736,4202,4176,19695,16389,22970,23706,13074,13075,19813,21135,19942,1794,1795,23770,23769,23768,7564,11887,1905,19720,1354,20751,2847,6871,10486,24900,13466,10964,23560,22154,22985,22153,22987,22152,22157,22156,22988,23557,23559,11720,22986,23558,22330,21879,24992,11070,24993,17115,12117,9448,24374,17052,24577,24186,10330,17391,10328,10224,10225,24806,10228,10232,10234,17923,17924,12952,9422,13655,20586,20585,13339,22656,20288,22347,22346,20151,20493,23766,22337,22338,22336,22339,10626,23486,17424,19304,23554,22573,16797,17413,18814,18608,18609,16355,21564,16637,21923,15868,9705,7951,7952,8245,8258,9707,16978,11091,11097,11089,11090,11088,21694,21380,18594,18593,18596,18595,24844,20187,6636,12618,18479,21762,15908,11187,11188,21382,11213,3124,21931,19564,3725,12238,21467,22375,2451,24800,24942,15481,21980,559,22682,22681,23701,21423,19891,14399,5701,21902,2462,23893,20840,22444,12919,23919,14982,14087,7384,8008,23941,9041,9042,3044,9770,13879,13878,17980,19922,17981,19583,13947,19923,19924,20195,23607,13880,19840,24220,13877,11765,12976,12977,3131,1235,7634,17842,14071,13644,16138,21924,16139,24791,13642,24641,16140,15202,16143,16134,16135,24792,13641,11975,7768,7586,18506,20666,12429,22396,22575,17492,21096,20144,12075,13162,13161,5405,2598,2599,22973,11881,8846,22974,22563,8868,16296,24199,17422,24196,16297,16298,24197,16299,24198,19103,21898,21899,22423,22422,13043,12419,22804,5419,2738,2668,23945,15328,22806,22808,22809,22811,2802,2801,2959,18144,1443,24332,1450,20796,2102,1451,3318,23639,2692,21913,2596,4863,4862,21214,2972,20891,3657,24201,10953,22427,21007,22380,22685,3945,24378,15901,23583,23580,16258,21484,12235,5528,4071,11111,5529,1749,4072,23584,2775,14054,16359,23256,22907,3004,20279,20044,19819,20832,19985,19620,19188,17417,24419,24670,19517,19766,20608,20830,24258,20372,21479,5483,14757,18461,7334,4769,19921,14758,3066,1776,16336,21713,9045,22135,22134,2624,20488,15822,15821,14059,14060,16358,20845,20457,17535,21761,22632,22623,22621,22631,22633,22629,22628,9792,20210,21802,17243,17254,21794,18330,17249,17252,23915,24481,24482,24484,24485,24486,18757,18758,17482,24367,15040,21107,11957,21897,18576,18575,18574,17241,6154,4733,21314,20935,22813,22815,12859,20224,51,13580,10958,10959,12912,12913,10956,10957,20270,20269,20628,11894,8500,24063,10981","Crónico":"14378,12450,12451,19532,3468,14455,14456,20356,24843,24089,23906,23908,23907,24600,24599,23846,22029,24567,24573,24574,3024,8490,8367,14408,14407,14099,14098,21724,15312,15580,24251,22179,23872,24250,21390,2685,4893,21502,21503,14536,14537,4026,4025,7612,7613,4645,15293,8221,10276,24181,24741,3793,6665,12380,13310,13307,16868,16867,13306,8048,12381,920,10304,20673,20679,20809,17364,23330,15170,14416,24851,16242,15792,15793,7882,8577,21730,8576,13363,16022,16020,16021,11121,8478,5722,5721,15556,15191,8540,23865,23863,23864,24065,24968,20700,6193,15180,18488,18556,5810,18460,24259,23523,18919,23788,17008,17009,15297,15298,418,24973,754,7870,895,7865,5416,7866,8113,8114,894,23816,21430,15230,15228,15229,20918,20917,15233,15231,15232,19973,19982,14471,14915,14914,9825,9827,24269,12680,3361,20649,20650,20651,14938,13775,3495,3163,3162,22885,13689,22886,13688,22882,22883,13376,24041,15088,11061,12167,21183,23053,23312,912,36,385,15209,15327,9908,9907,11823,13931,24695,21573,21575,21574,21572,10978,10977,20868,10976,10975,9033,9032,3906,956,12537,12219,23874,23875,24734,24752,13882,13881,19594,19593,17815,19548,11141,13313,14979,18583,2057,8046,21031,21030,17911,16958,1353,14738,21322,14678,14679,24389,24597,24596,24977,24976,24151,24149,24456,24457,24150,24458,24888,22167,22168,23597,23697,13203,2576,24964,20967,20403,21359,21358,7568,24755,24011,21559,21560,22335,22332,23579,22334,20395,17728,15194,24918,21775,22467,22470,22469,14792,7891,7485,11874,12098,19817,13321,23758,24640,18236,24722,2688,2235,21147,21149,21148,607,18399,24225,12560,12561,974,7867,5551,7868,973,726,21058,19616,11302,11030,24987,10839,18697,1119,18389,18361,1690,10246,14276,21893,4264,4277,6295,23069,12227,21357,21451,24338,9272,18072,19956,22955,24147,24148,14736,24393,7914,14542,21345,21346,8403,8402,13375,13374,20872,20873,20871,19588,16909,6292,5047,23799,23800,24662,24664,24663,24665,24720,24719,23201,23200,24228,24227,23456,23457,14580,21530,20687,5239,22936,6212,6213,10092,3931,2292,23098,24776,19597,19596,1505,928,929,21988,13507,2880,24303,3136,3137,17309,17310,17308,14348,15106,19879,14891,15107,24788,24789,22653,12131,11787,20808,21457,3677,6544,18710,13388,13389,20331,20333,20332,14215,14216,14217,10207,13773,20470,20471,1649,17451,6952,7078,6890,7372,3903,1648,4331,17450,10777,8562,8561,7731,8373,13264,7730,13262,8365,13263,7729,10860,13257,11307,13258,11309,13259,11310,13261,11308,13260,23257,23922,14335,14334,18947,24708,24709,24710,20655,20656,22207,2682,23063,10915,24010,22081,5003,5222,8387,21064,21499,21500,15942,15940,15941,22440,9819,15796,7589,8420,24756,24757,9633,16989,20867,3,21616,20378,23660,17635,14767,7201,14382,14383,14908,8657,19753,6235,17285,9850,10389,20652,13951,13952,13950,19875,19881,14349,17678,8193,8227,8171,18024,18025,18348,18349,9436,11114,9435,9434,24423,24422,22036,24898,14930,3469,3466,18458,14187,2546,6031,6032,6119,7494,7444,20232,8659,14935,6799,12677,20034,9280,20757,21304,23606,11127,2716,5691,1668,8022,22360,1667,6659,9784,10932,2652,2651,20775,14575,14576,24031,14196,14963,14964,24765,24766,24633,21951,21950,1853,7873,9265,7567,2769,2773,15937,14884,23664,8042,749,15347,16934,19977,19976,224,7899,223,24294,24293,24265,8068,12525,12526,13207,12527,12528,14228,14232,14230,24083,24082,24084,24096,18530,4652,17741,3769,23783,8592,23224,13087,12195,12367,19798,19799,21537,9746,24724,15514,23577,17896,21545,21548,22546,18386,8520,12106,24425,18387,9011,20595,20185,18802,17747,23808,23807,23809,18774,23818,18895,18833,22937,19488,18588,24437,2515,1531,119,15421,15422,15418,15419,15420,24072,24075,24733,11118,12097,10945,10926,8440,8447,20228,16872,18932,7559,7558,15774,15775,19698,17948,17882,17883,23817,23870,10016,9967,10015,20379,24270,22065,7008,24714,13891,14376,13250,14375,8095,18680,6833,7293,14859,14860,14861,15206,24114,115,761,750,21784,20703,24746,18103,17307,17305,18476,18455,20799,20800,20802,20803,20801,20804,4085,3220,7892,16237,24894,20782,20564,24206,20783,20476,20784,20477,11772,17626,14569,24387,16303,17457,11152,11153,14318,7714,22845,22846,13343,21501,8084,7590,14191,20755,23910,18373,18374,23914,24648,2497,24834,24833,19606,19607,7417,7418,13373,18026,18027,18958,14602,9751,9750,17938,9810,17578,7075,21619,4763,14807,9669,18456,8904,17729,24211,4451,209,2034,208,910,1215,20017,19723,24078,24081,24079,24080,3373,2873,14801,5805,5806,9203,14351,9500,9644,23862,1126,23160,17015,16535,23435,16879,20823,24825,4823,2787,24744,24748,23421,8358,13084,6,14431,18826,23695,24158,12388,12398,24875,24876,24874,10495,8195,762,763,24471,24469,24470,12177,8169,7971,8467,21353,24585,14708,14347,8140,21742,16827,8466,12329,17846,8542,18457,18433,12549,12550,13604,13605,12516,1610,2335,12603,12604,3875,1638,20544,17576,8544,18956,10929,18957,8545,14788,14790,14789,14787,10931,14586,14422,14423,10930,17528,1662,5465,2473,12202,17527,2534,6329,11108,11106,13320,11107,11145,3890,3889,1850,4265,18687,3300,1145,15525,14735,14734,24516,9503,18806,19613,18805,20234,20235,1339,12417,12418,19844,20405,2168,13568,20394,14200,2641,8477,24678,16768,16629,23106,16769,818,808,3146,10136,23605,8118,8073,17850,9859,24529,17000,17001,17002,20037,20036,20035,9078,162,18347,1420,1419,1923,22181,22180,24618,12659,13232,24242,24243,24246,24245,24244,13380,13379,16655,13378,3685,12493,2476,14947,19754,19755,20236,20237,20238,19756,19757,19837,24966,17845,15166,17937,24850,24849,20567,21065,20810,21207,23700,20451,24958,8550,16281,15198,15199,21881,21882,15196,15197,21567,20822,20766,20765,24305,11872,11873,24919,8036,1187,7467,4286,24840,24607,24182,22062,22588,6553,18446,755,11919,24707,3504,18285,24723,24754,24775,24759,12283,15205,12292,12665,24278,24280,24279,20377,8338,7983,17973,22311,22545,17652,15798,24392,18401,18400,12207,12206,7676,8200,14405,15131,14406,7492,6853,8418,14733,14786,15407,12047,11906,6598,14572,14387,9856,14682,17996,17997,1929,4602,1867,3046,15799,6053,20473,22684,15416,444,15554,12337,12336,18800,24398,21640,21641,21543,21552,21546,21542,21642,21544,13120,13121,20171,9910,22343,3238,21765,21763,21764,3201,18410,21351,21260,22471,22472,19734,22657,9581,9582,23762,23763,18675,14666,14324,16241,18587,21549,21547,24414,14676,12533,12534,24335,24334,24769,24768,24702,24703,24704,15334,15335,15236,1849,24658,24657,24659,24979,24980,24978,23902,23883,17990,17102,17101,23837,23860,15956,15329,18029,18028,23731,20701,20712,8411,18799,24947,12320,12324,3243,837,1986,17281,12853,4801,7269,4743,21144,21145,12522,12521,20638,20637,14570,5126,23876,24073,21880,18113,18110,20452,19821,23617,21442,21370,23215,23216,23217,21776,16016,16017,24317,24316,21779,12391,12397,13776,23962,3733,17987,13857,13858,13859,14255,14256,14254,13860,13861,13862,8324,14234,18897,12214,23871,3829,1245,14582,3933,1248,14737,3450,17577,14598,16366,16365,14564,14565,20930,16341,24758,24725,24726,20931,20932,24770,24381,18940,22185,15829,24949,24951,24950,23989,23990,23988,7312,1994,18607,20630,23348,13124,9670,23067,23068,3188,1267,8549,8547,8548,13920,10400,10401,10990,10991,16838,1279,24090,12495,13828,13827,13829,19711,21871,24115,1281,1282,17153,7886,14907,14906,14904,14905,21596,18739,18738,18740,21798,21187,6353,11891,18734,18779,18735,18736,17497,19949,5161,13128,23352,23603,10979,11774,20739,744,24348,13777,12392,23955,23777,21360,18818,23778,21362,18819,21361,21363,21006,7933,23911,7140,6398,7746,7745,17819,21541,21321,3362,3237,20163,17547,20164,23088,23087,17435,21184,24027,14512,14513,15299,15301,15300,21771,18018,13403,21584,21585,23432,23433,24986,22899,20446,23729,9804,1696,1689,21609,13393,13598,21612,21613,19609,15957,21666,21667,21668,22333,21558,21556,21557,20811,24646,21372,21371,15597,15819,20864,20861,20863,20862,5045,1292,4032,17602,24727,16333,16334,16335,5993,5994,5995,5996,9986,9987,2112,2038,21150,766,15066,24354,15432,15431,20280,12249,13794,17238,14612,1310,54,20439,3625,1692,1693,43,1100,16238,3985,11248,14821,24426,19992,21777,50,55","No Crónico":"11569,17500,14710,20313,22852,1711,24889,6961,4346,17378,372,8094,2833,13925,23665,9635,20413,10022,24050,2459,1933,6818,3990,15235,23203,23110,24883,3950,2051,24882,11113,17730,17469,14962,14961,13669,18425,4243,1991,7674,19744,20865,1706,8070,13116,13115,23997,16393,21112,24967,22446,23493,20721,4409,1592,3515,2197,1591,1581,4520,3446,1962,13597,5350,13538,14400,14873,3473,11848,11870,12569,286,2793,2608,1379,5068,12250,19638,22130,21946,17436,6531,17731,8495,2196,6502,24679,13834,13249,24345,292,9776,9773,293,4267,14454,3250,3251,1843,18304,7686,22345,7274,18729,18730,20645,24857,10983,7838,17847,4097,18006,5785,17917,4206,4572,3925,20134,296,200,734,295,16662,24886,24887,24885,390,8741,644,8736,643,22139,642,1412,13405,14401,23644,23645,24450,18959,20283,12147,18893,1660,13524,1731,23140,639,12806,24266,15979,896,23714,15104,18822,16084,6672,6660,6940,23735,5624,19952,19953,9862,9863,5063,16634,18502,22322,7893,18922,23269,21270,21271,6326,14411,6140,20744,20707,16742,8100,5050,17034,3739,3832,3740,13682,10855,20309,20308,20773,21630,10431,17452,11747,8177,23937,8226,14879,16131,16146,20276,22399,18551,14350,2901,16200,594,1972,1413,7164,17399,22652,2903,6830,1971,18667,23036,18699,18663,18665,18666,18305,9009,4051,21034,21387,14934,23329,18229,8416,8533,20640,17166,17927,2703,2936,2744,13342,15060,5116,3635,17915,445,947,35,22000,20478,6201,4006,3306,24346,3080,14720,9980,18339,17707,22876,1769,20445,13909,302,2566,301,8896,8895,14330,14004,14001,14003,14002,962,6142,5934,11982,959,18803,22416,12396,21356,21327,13793,13489,6891,6892,7740,22372,7781,4967,2990,2991,3119,24383,24823,15302,631,11171,1517,1511,2431,2726,24099,23601,13653,2507,15905,1926,1919,20615,2033,20277,9530,16820,5749,3801,6930,20705,3734,8638,8640,20376,21738,4095,5001,13649,14833,24972,23369,13308,5055,9761,7894,1577,822,913,914,915,13801,20727,2755,2475,1995,22920,22919,15172,20719,7329,24683,18967,14784,24838,12670,2919,4250,17024,918,3240,19650,17951,21315,2398,3042,8317,15789,15790,20965,15791,2636,2637,764,23928,23929,23930,23931,20459,17068,21136,20728,2070,2182,21491,21492,21490,5191,12442,21273,10360,21054,24826,17901,16877,7936,18065,22667,3934,712,24333,12822,17173,12823,17172,16067,4105,4106,22312,20886,14636,23753,22196,22198,22197,22199,1345,1346,7306,22828,391,10841,4700,24652,23961,23024,21004,21005,21152,23091,23090,2150,9678,23802,19718,24350,12357,23322,23321,14814,14816,14815,18941,18942,15055,11040,6866,1362,1361,6383,5977,17786,3671,24330,24331,14287,21166,21167,21352,18626,20797,18627,408,399,8567,24404,18108,24606,24308,24314,24439,14417,1422,8369,272,20533,988,21511,21620,23473,981,5374,18413,18414,14976,8265,971,9966,4936,2304,5696,24672,15832,5630,5631,2477,3209,2311,3368,20173,10013,6878,13131,8238,13792,17587,18354,15434,3963,5970,24377,11244,20746,16918,21461,21654,3422,3563,14759,18591,9650,983,1617,10504,4727,14326,13247,17780,2144,1424,11161,13976,584,12902,14931,15801,17615,19887,18813,23454,20475,23667,24231,19702,24473,24474,18549,17235,19760,19761,13948,15973,17122,580,5767,11593,986,5288,19605,9278,21472,4194,16170,3686,15111,8237,8312,3370,6125,6181,13544,2705,18266,24412,14366,22362,8844,9626,570,12215,21888,23599,2133,21767,16824,2541,14680,18883,19889,21753,20479,23225,22067,21113,13762,20644,20281,18737,22138,20282,12154,7051,3028,3076,8464,8462,8463,20740,20730,21972,22205,24582,24012,550,396,6927,2188,2187,24492,20925,2261,2181,20581,2183,12187,14258,17119,24935,12247,12638,10935,17380,18001,20772,20601,14625,24061,5246,10850,7827,5959,5958,21192,6539,6370,4507,3822,3083,18808,9527,9513,6649,1674,3309,15151,20869,20870,14799,20971,20970,13487,3617,2979,18426,5282,13268,17473,23075,23076,24681,4925,14677,23050,21266,21265,22119,5129,5128,20927,18745,21659,7504,6060,20741,6062,6063,20472,23869,16301,13949,20963,22235,20627,1441,7695,1522,24000,4518,8873,2798,12053,8126,3667,969,17003,976,977,719,718,8034,3662,4557,17010,2568,9929,22234,11741,11740,14286,11160,17740,21989,23103,16750,22370,7858,3574,990,19697,18355,24767,2184,7284,5029,22101,12134,22942,14388,19506,17022,21464,24049,7916,7930,23759,23092,19835,4528,1964,6832,7409,14322,6171,23602,2031,15363,24946,24948,982,3918,22841,22693,23080,8538,18310,24602,4784,9241,9242,9248,282,6797,5910,5118,24797,20819,16770,13488,11895,13910,24100,24959,20955,24981,18261,21837,7777,19590,23623,2375,13151,20239,1000,13940,2233,24023,2552,2556,267,266,3225,5928,2430,11518,14277,20722,14220,20723,3085,5065,6589,20795,22485,12382,21427,21621,12543,12559,20399,12541,16309,777,21551,17650,17649,6756,2119,20460,23909,21478,8410,8059,24896,24895,15482,22395,22200,22169,20450,13420,24841,17441,1855,4238,16198,21383,4489,24446,6123,1659,14798,6652,15035,15034,24762,15552,18933,18934,18935,18971,5152,7231,12218,5909,12535,14699,2866,12217,23736,24839,12020,20066,16249,4392,5114,7909,7950,1378,14579,19587,17916,20805,17599,18796,18797,14325,17600,21140,21930,18798,13367,17142,13368,17141,14222,20653,10928,18282,24205,19526,1886,4171,3866,4275,22874,22875,22873,6958,1885,4297,17484,17293,8350,7883,7715,3561,5968,2300,7399,22208,262,1003,23594,22997,10247,8355,21083,20411,6750,2058,21127,4600,2355,14881,5955,1377,1738,1772,18807,17146,1376,2323,2324,2325,18645,4671,801,4617,9649,23074,16536,16192,22225,16744,18824,1640,4027,24743,24749,22998,22607,24822,991,1004,3021,13778,6121,3842,3596,24025,24026,24066,24067,17168,17803,17169,17804,3780,3699,2484,1607,13112,24059,24167,11018,11019,15969,19797,24224,21752,15967,17123,17124,8337,8335,12552,2179,790,13411,787,5252,4838,5494,6739,22689,1028,8116,8501,23253,23254,23251,23252,2289,14235,8452,20338,20536,22127,18239,16523,5113,19748,17640,18053,3611,3384,2236,21468,4508,6340,20255,15763,3676,14204,2010,13935,21494,24232,24233,22057,23494,1013,17477,16659,4689,5143,1730,3792,2139,15336,13146,2138,2374,2702,22668,21554,24254,24256,24982,14651,24302,20806,23954,5717,21982,24507,24506,6124,7453,13819,7996,4667,20690,15879,14663,1569,2298,244,14111,16932,16387,19531,17289,17288,23940,23943,22309,22310,21964,21963,21965,22956,19898,3079,11168,3447,3861,22104,22105,10996,3748,14706,3750,21800,21801,1016,1014,1033,1019,19863,19611,21463,2211,24085,20654,24656,24753,23058,12828,12829,15509,15510,432,430,12639,5548,22865,22866,12383,14126,14999,12332,23986,23985,23987,11143,18694,13796,8181,20594,5965,7486,12959,3000,6027,632,6613,4201,14161,14162,8236,22419,18881,18270,18271,5227,22342,22449,16910,9109,5036,20284,9250,20625,19945,21914,15998,13539,23019,22437,23984,24647,1029,23705,14514,5568,19832,24229,13748,13692,7554,1040,6882,4972,3958,16074,18715,16075,4,18,12456,1673,1672,2548,12636,12637,6273,24985,14113,16279,13385,14285,2379,18196,14045,1881,23959,23958,23960,23642,2205,11516,2153,2301,13988,2152,18622,18624,18625,15369,15368,21874,21050,6046,628,575,24443,233,4738,7356,8551,235,236,1613,20709,1614,21449,5880,3798,16011,5085,20635,3865,16286,3904,6597,3905,16288,4005,20856,11060,12935,11022,20787,18002,13132,15508,15474,21115,6847,24388,18544,18545,17716,13398,8923,18260,21032,21368,1663,2993,24249,21605,18681,22077,18744,23341,9334,9335,16654,17873,2016,24568,24248,4681,23756,23755,23754,19839,15878,15471,7060,7061,7820,12909,17134,23578,17445,15985,19860,19836,21508,2438,1783,3471,18402,14820,16888,24260,19707,23548,8437,21571,13390,21169,23549,19614,17263,5457,24989,8196,24832,21168,9754,7400,7406,12693,20115,24226,8017,5396,24323,7026,23926,7977,2176,2175,2437,8661,22076,23005,24945,21068,22706,24584,14420,22447,22448,4017,4015,4016,5840,5839,20731,13545,2164,2942,24013,22141,14440,8662,703,16132,4771,4770,21073,20217,1952,21740,21739,14992,5522,9378,4453,7436,13330,13331,13332,18153,12864,12863,12861,12862,20474,22015,15828,4240,20597,3930,11454,11494,13041,6132,5212,1789,1669,1671,5939,4817,11243,15524,24667,24669,24006,11744,10933,14721,6028,14722,12553,14723,12395,14402,24475,24476,17037,17038,3582,6607,13137,13138,24601,24653,24442,24440,24441,18748,24263,21137,16141,6269,4811,15286,16060,2216,625,14367,16061,13136,9749,3272,21174,21745,5155,2353,2461,4884,2259,2007,18265,4423,6767,6766,24125,12831,17962,12832,1069,1068,4291,12833,23913,12834,5397,4921,14209,20194,8253,16940,1864,21417,23084,14713,18004,927,21833,16780,2021,624,2006,14903,15195,22958,229,230,228,227,22381,17322,5987,5989,17474,12590,14872,8901,7862,14,7848,2229,3899,8723,7968,9283,9747,11594,9433,16332,14985,7491,1086,1537,1880,2555,1294,4468,12567,24380,21634,23070,21232,6057,8314,18234,18242,18235,15788,21243,21245,1083,11748,9709,7789,21983,7897,21465,2214,12835,12836,18548,18149,1073,2813,24285,21354,2099,1754,20815,20816,20817,23899,22172,10023,8318,7934,6086,1372,21487,20428,14966,14965,16753,20021,24827,24828,3420,3062,22484,22434,16847,1620,1616,17433,4210,24689,20642,7330,24937,1566,1565,2134,24154,3291,16058,20278,12855,24468,8854,23991,7471,14465,14466,218,219,221,4450,6951,6852,2956,4864,9758,14280,14279,14278,13752,1716,24047,24046,24043,14404,4043,7429,4539,12564,3047,22959,15953,2395,1918,1098,1097,666,24694,12385,24022,21629,14698,22697,11922,15555,8612,16826,20361,5506,21328,9869,19895,17583,23848,14127,8098,2539,8330,4720,23640,4674,16071,16070,1935,1108,5203,13871,17021,2511,24017,8671,15289,14365,21269,21154,15826,2442,17994,21709,12837,12838,12839,18364,14642,14643,24020,24349,18336,24103,4099,24655,18109,14739,16804,8783,5731,9928,17444,21272,211,210,24605,20807,17443,9046,11770,21055,17914,20326,5167,7524,13693,21063,17013,508,20926,724,6661,14715,18804,21033,19608,24666,18365,3858,3058,14459,14011,20245,9062,12649,12650,12651,19542,18755,1845,5119,4218,13135,20517,6190,19796,2900,671,17466,670,21720,4577,14701,16741,13315,8397,20710,20711,1103,7045,4715,13431,6654,6639,19896,7366,24580,13760,12701,21466,20658,20659,8120,24684,24395,24008,2367,15472,7228,3691,893,1985,1984,5614,1130,23668,15353,17724,17725,13865,13772,14614,13866,17597,16076,17326,6445,2222,179,23429,23625,23880,20221,22654,22655,7539,6931,8251,9988,13366,2913,17750,3538,17135,10912,692,693,19185,691,24284,705,24643,24644,2921,23105,23107,6810,2491,21191,21190,21189,21188,708,4298,3554,4091,3287,15183,19779,16945,13324,19782,24515,21570,1759,19780,24390,15987,22079,22007,8356,8404,20837,13490,16174,1684,2310,20433,1111,14785,8900,5799,18267,9667,18015,9665,9666,16913,16912,24983,10274,13275,17601,12440,22922,23363,21974,18337,24171,21399,15361,16127,8085,2517,5552,5291,15502,20367,16955,6065,22210,6623,14300,6378,4556,662,22921,21009,566,24916,659,22137,11079,4596,19781,16981,16982,20015,8230,7850,3226,11791,13314,2359,1123,21797,14725,20427,5502,5503,5504,4578,19658,1809,16754,22952,7915,8678,23726,18367,18366,14560,14561,6849,2406,4388,9847,14594,9732,9673,24512,20263,24673,21426,7271,7292,7109,7550,20201,24739,18827,18828,7947,4808,9502,9501,16239,5899,13607,13606,21175,21682,21683,15058,15212,19877,17579,18872,15057,19884,15966,15965,24712,8613,10911,16828,2071,6771,15996,16350,20631,23202,24934,9040,13491,13656,14732,15162,24540,23900,21685,21510,21684,24671,7969,8363,2710,16852,16853,173,29,1092,11972,1093,16178,21486,14508,14509,14510,10739,11923,21197,21198,1846,1605,1604,6617,6618,21306,12840,12841,19535,12842,21267,12844,12843,24761,4816,22384,13110,14851,22125,12648,7675,4434,23532,21737,21736,22220,24555,22219,9559,22222,21398,21919,16130,17641,11924,3039,20715,20436,18965,18581,11768,3116,3090,17202,17203,24188,1508,6079,5894,7465,15820,9561,8224,8384,10422,1927,1453,7073,465,1688,12412,12413,22509,167,5271,18098,18099,18097,18100,24514,19565,5321,5324,13541,18440,13751,24845,3883,23939,23938,17876,18432,17045,8044,4233,4657,20716,1147,9860,4774,9854,5897,14544,24570,20729,14730,13991,11978,13992,11979,9783,5499,21011,12208,12210,21723,17467,18873,17550,23934,21514,20468,20374,23414,1946,1642,3096,24732,1493,2986,1153,18503,17557,13763,5492,1149,3286,8370,11603,7904,14823,4697,2914,20745,1697,2886,3043,5611,5225,5648,8285,8383,3999,3998,23963,24988,20219,3811,4874,1155,165,164,2018,1944,12692,24939,24546,24545,24544,4441,20788,23611,23612,17171,17170,24140,24141,10949,13334,13335,13333,13336,15787,8579,13241,11869,12562,14717,8199,18605,9522,8448,13923,23342,12179,23345,13592,13593,13594,13595,18283,18284,23346,24542,17471,12347,14852,24513,24415,19833,15760,15761,12180,6819,22048,12191,1685,24015,1683,24371,13089,7314,7911,24933,23815,20061,5320,12144,12808,12405,21495,1455,11093,21496,5049,17328,8797,3588,23730,12056,6100,15928,14956,2884,4067,3396,17483,4997,18148,2447,9651,6371,9550,1469,1468,21482,22482,21522,24795,14718,21012,18411,17623,17622,17625,17624,9657,9656,23898,9240,13404,23942,17753,17783,23694,17751,17940,17752,3360,17794,2114,2645,24731,24730,140,21517,141,6385,13481,20754,4156,1174,11934,11933,21538,18891,8905,14414,14415,24852,24281,21900,6427,22879,24058,20732,20733,14581,15321,14658,21046,15759,5487,5486,9101,9247,20742,1347,20734,24353,8753,1190,18693,24713,21246,1893,13665,11027,16193,16194,11648,147,1182,7479,6114,4731,22704,23790,15984,15986,14887,5618,16923,16922,16924,17227,24133,2215,20853,2390,5363,18896,558,12390,12389,14245,12462,34,1551,1351,22702,11109,21512,16904,24472,20929,15955,2361,2362,16944,20836,539,14782,20397,24385,24386,18478,7698,18477,12472,22142,544,1242,6850,6851,24223,12358,4962,9097,747,23026,20447,23743,827,6945,19954,23803,18690,6860,4490,6859,3505,3809,3159,24417,24321,12030,13419,11984,21385,13505,20067,21369,1599,1598,1600,6643,6642,16189,17291,16128,658,16129,24352,6155,20724,11981,5122,2052,7052,10450,13886,13885,13651,17165,4714,3815,14012,6007,1193,24526,24518,15149,15150,15148,23798,20170,22659,3171,441,442,20483,21355,5105,5106,10994,2613,15041,17788,2584,15140,15141,17232,11125,23643,3790,5491,7156,440,439,23998,1875,20748,2017,2531,3477,20430,10791,20304,20218,4710,20157,21446,20843,19984,20341,446,11855,11156,3086,3297,22950,24879,24884,18617,22131,2302,20598,21366,19880,19882,21364,14777,19876,21367,21365,8899,10122,8605,13774,16855,16856,16854,8479,8482,8484,9714,7018,5157,18793,21658,24144,24145,24143,24146,14977,15101,22340,21758,5725,4429,5250,5249,5727,24603,24604,3192,13377,6238,16118,18838,9803,14212,2224,781,22034,24530,24534,6503,14874,6365,18771,15364,1198,14875,14876,9844,13898,13418,21665,18289,15773,1201,1203,3367,5230,3887,5381,16757,11649,1983,18077,18076,20749,7701,24239,17046,18854,13755,12672,21970,21971,21969,24071,17763,6920,24910,20714,15559,24971,24688,16236,24306,5705,2090,18504,13542,24068,15352,24091,15176,20291,20292,21037,21977,22909,22910,22911,22694,22695,22696,21618,20500,6228,2412,3590,24207,24208,24132,1089,1088,3781,1931,21081,1813,1812,6624,6600,13090,6336,20706,2167,641,17963,9725,4781,4782,21966,17594,18014,22005,17900,19529,18616,12539,14541,20412,19968,18961,24760,24680,18867,19577,19615,24021,19580,20596,7551,15287,13537,18439,4982,14955,6524,6523,20216,20785,7325,1519,17437,15527,5606,19708,20123,20660,7200,5758,16063,12133,19604,2426,2427,23023,14327,23956,2940,2089,20138,13589,20725,1216,24837,1210,6280,2957,6281,2974,8053,8054,13122,2077,8091,118,7181,11013,4157,3249,8386,21757,10770,2897,8359,10769,2896,21904,6232,4375,13903,20383,14190,14119,13782,2647,4480,2924,2397,1489,12093,12092,1492,1491,1490,14433,2185,21440,2095,6425,14434,21000,23218,3489,2701,5298,2700,2698,20267,15358,15357,24236,24235,24136,19996,17742,130,18428,18427,24830,19505,19504,14981,16078,16079,33,1222,12898,5135,9713,24859,1624,5645,18951,2575,9519,19589,4474,14397,14389,7422,8435,6875,17211,2680,12540,20717,17739,24801,24802,17320,5448,12633,1753,1465,18268,16911,7644,6727,20060,22373,19523,8287,16028,2693,12807,18857,18858,1737,15997,21428,24209,16119,16191,16019,782,3068,10505,14637,4626,7630,6536,17105,1877,15436,18275,1917,937,938,4432,8816,5366,128,23240,9058,5768,7411,15247,19866,1950,1976,24416,22826,22827,4369,16269,14948,15529,20735,20736,11167,18946,24936,18945,1208,1207,21603,23894,788,24299,24300,18731,18732,18733,14427,23927,14426,8530,2910,5902,3176,14727,23702,24347,18953,18345,614,2074,18344,10158,3465,24452,3007,3008,7546,24860,10842,24740,20750,20702,24816,2525,24796,17463,11169,9252,15039,15038,24963,1987,21228,8352,17536,24230,18073,7678,2078,2050,6873,11314,23877,5761,6081,5596,17323,20966,24691,24899,17212,2758,18112,6807,17743,6808,24372,24594,6615,6616,6628,24921,10859,11119,1773,12021,24890,24891,21903,1256,22473,21751,18979,569,656,3161,7956,24137,4601,2616,3442,20737,619,3968,24435,17972,1269,646,21391,645,18441,2309,18163,16605,8886,17155,24436,24742,1262,1263,18368,24351,24355,1265,4698,11936,8296,11901,23933,4549,23057,7265,16652,24677,19659,8218,16065,12520,24668,13854,7696,11755,5445,21241,1998,18276,10425,4951,16801,20616,16259,23892,3629,18726,4120,5264,16805,15830,15517,19793,1608,3299,1277,1276,1278,7281,2571,2500,24729,16758,1545,20760,20762,20761,9510,2502,2501,2879,2372,2784,23030,24660,1568,5635,3311,17472,6567,7809,6663,105,1454,2209,2207,4907,24014,2646,635,634,4155,6967,12244,14013,17434,24282,17828,7205,5746,5414,1632,1631,15027,15026,2786,3753,3754,13425,23490,5077,20738,14893,24477,21715,15983,5281,3097,14742,18711,5617,6330,3350,8188,17639,24932,20029,24931,4719,11517,7931,8167,8163,6354,8194,8364,13220,18269,11162,1801,2091,13238,84,13990,12696,512,3376,513,7131,514,20057,15144,17706,15143,21677,21455,11010,18111,2506,3895,21226,21429,20848,20849,24062,17292,2149,22002,18944,15817,13303,15002,12090,2358,24863,6177,23999,22363,6793,15326,2059,2061,24990,2086,19805,16885,23891,23889,23890,15245,20409,4093,7625,4543,8894,8875,18430,13265,60,10155,24035,18859,8056,24790,82,83,20743,20713,16522,17459,24798,21872,18412,21638,21637,21636,21635,17423,5394,7756,7757,6435,6436,7759,4435,6437,17620,17537,6225,4208,519,17506,17507,3329,3330,20657,8454,19537,19536,3856,4077,17058,2145,2030,24700,13743,8826,62,1757,61,1756,20956,22221,8361,2227,14781,1444,2342,13754,17476,9744,5612,5697,5698,5699,5700,18327,21196,545,24569,18640,18641,16886,16887,14293,14292,24112,4929,2771,16081,16080,3658,2174,3103,3104,9245,21424,21425,13337,7970,12010,16931,13602,14210,14092,20174,15970,7307,12517,17255,17247,18978,11144,23313,17958,16003,13818,19778,2177,23784,10010,4314,17757,21663,21664,1982,745,8322,72,71,74,1298,1296,21039,24715,24716,21384,10020,19546,18010,22636,2295,9328,12622,12623,12624,12625,23810,23812,23811,23813,23814,6748,18295,8175,24941,1304,15516,20752,15515,23354,23353,20753,17991,17992,24991,13543,23916,2757,8240,13341,3853,5598,6431,4732,1686,22378,21040,21041,2330,1858,9791,6328,20718,11041,11043,14297,23663,16908,4837,13092,23677,23533,52,21562,21563,1651,735,536,739,535,6590,6673,3714,46,45,7876,15765,2708,3923,3924,24595,7673,7672,6068,6069,1977,14665,18885,1457,14896,1458,22030,14897,4059,49,3467,4304,22854,20521,16190,18615,751,752,7192,40,44,38,6746,14883,22133"},TM={};
+Object.keys(TMC).forEach(function(t){TMC[t].split(',').forEach(function(c){TM[c]=t})});
+var invTm={};
+function tmOk(r,sel){return !sel||(r.fk&&invTm[r.fk]?!!invTm[r.fk][sel]:(sel==='_'?!r.tm:r.tm===sel))}
+var INSTC={'45':'Banco Central De Honduras','1019312':'Ferrocarril Nacional De Honduras','1011764':'Stibys','99730572':'Banco Atlantida Sa','2087723857':'Centro Cultural Sampedrano','1018175':'Banco Atlantida Impuesto'},INSTK={};
+Object.keys(INSTC).forEach(function(c){INSTK[norm(INSTC[c])]=c});
+function ncode(v){return String(v==null?'':v).trim().replace(/\.0+$/,'').replace(/^0+(?=\d)/,'')}
+var INST=/banco|poder judicial|asociacion|s\.a|sinapsis|mapfre|crefisa|fundacion|cooperativa|hospital|clinica|seguro|insurance|poliza|mediprocesos|grupo/;
+function instPick(r){
+  var c=[];
+  [idx.n1,idx.n2].forEach(function(j){
+    if(j<0)return;var raw=r[j];if(raw===''||raw==null)return;
+    var n=norm(raw).replace(/^inactivo /,'');
+    if(n&&!/^\d/.test(n)&&!TE.test(n)&&GEN.some(function(w){return n.indexOf(w)>-1}))c.push({n:n,raw:String(raw).trim().replace(/^inactivo /i,''),j:j});
+  });
+  if(!c.length)return null;
+  for(var i=0;i<c.length;i++)if(c[i].n.indexOf('consumidor final')<0)return c[i];
+  return c[0];
+}
+function isBC(k){return k.indexOf('banco central')>-1}
+function buildB(){
+  var A={},prev=selB,bs={},ts={};selB={};
+  recsB.forEach(function(r){var ik=r.ik||r.k,e=A[ik]||(A[ik]={k:ik,n:r.inst||r.n,pg:0,v:0,rows:0});e.pg+=r.pg;e.v+=r.a;e.rows++;if(r.b)bs[r.b]=1;if(r.tp)ts[r.tp]=1});
+  accB=A;
+  Object.keys(A).forEach(function(k){selB[k]=prev[k]!==undefined?prev[k]:(INST.test(k)||INSTK[k]!==undefined)});
+  var cb=$('branchB').value,ct=$('tpB').value,bk=Object.keys(bs).sort(),tk=Object.keys(ts).sort();
+  $('branchB').innerHTML='<option value="">Todas ('+bk.length+')</option>'+bk.map(function(k){return '<option value="'+esc(k)+'">'+esc(blabel(k))+'</option>'}).join('');
+  if(bk.indexOf(cb)>-1)$('branchB').value=cb;
+  $('branchB').parentNode.classList.toggle('hide',idx.b<0);
+  $('tpB').innerHTML='<option value="">Todos ('+tk.length+')</option>'+tk.map(function(k){return '<option value="'+esc(k)+'">'+esc(k)+'</option>'}).join('');
+  if(tk.indexOf(ct)>-1)$('tpB').value=ct;
+  $('tpB').parentNode.classList.toggle('hide',idx.tp<0);
+  $('refB').value=iso(maxD);
+  drawPick();calcB();
+}
+function updPickT(){var ks=Object.keys(accB),n=0;ks.forEach(function(k){if(selB[k])n++});$('pickT').textContent='Cuentas a analizar: '+n+' de '+ks.length+' seleccionadas'}
+function drawPick(){
+  var ks=Object.keys(accB).sort(function(a,b){var x=isBC(a),y=isBC(b);return x!==y?(x?-1:1):accB[b].pg-accB[a].pg});
+  $('pickL').innerHTML=ks.map(function(k){var e=accB[k];return '<label class="chk pk" data-s="'+esc(k)+'"><input type="checkbox" data-k="'+esc(k)+'"'+(selB[k]?' checked':'')+'> <span>'+esc(e.n)+' <small style="color:var(--mu)">· L '+fm(e.pg,2)+' · '+fm(e.rows)+' líneas</small></span></label>'}).join('')||'<p class="note">No se encontraron cuentas institucionales o genéricas en este archivo.</p>';
+  updPickT();filterPick();
+}
+function filterPick(){var q=norm($('pickQ').value);Array.prototype.forEach.call($('pickL').querySelectorAll('.pk'),function(l){l.style.display=!q||l.dataset.s.indexOf(q)>-1?'':'none'})}
+function setPick(fn){Object.keys(accB).forEach(function(k){selB[k]=!!fn(k)});drawPick();calcB()}
+
+function calcB(){
+  var has=recsB.length>0;
+  $('emptyB').classList.toggle('hide',has||!rows.length);$('outB').classList.toggle('hide',!has);
+  if(!has){if(rows.length)$('emptyB').textContent='No se encontraron cuentas institucionales o genéricas en este archivo.';return}
+  var exn=$('exnegB').checked,days=Math.max(1,+$('daysB').value||60),minv=Math.max(1,+$('minvB').value||1),bf=$('branchB').value,tpf=$('tpB').value,all=$('scopeB').value==='all',
+      ref=$('refB').value?new Date($('refB').value+'T00:00:00'):new Date(+maxD);
+  ref.setHours(0,0,0,0);var rt=+ref,map={},ab={},i,r,c,k;
+  for(i=0;i<recsB.length;i++){
+    r=recsB[i];if(adB&&!r.ad)continue;if(!tmOk(r,$('tmB').value))continue;if(!selB[r.ik||r.k]||r.t>rt)continue;if(exn&&(r.pg<0||r.a<0))continue;if(tpf&&r.tp!==tpf)continue;
+    (ab[r.k]||(ab[r.k]={}))[r.b]=1;
+    if(bf&&r.b!==bf)continue;
+    c=map[r.k]||(map[r.k]={key:r.k,nombre:r.n,cods:{},insts:{},sucursal:r.b,usuario:r.u,tp:r.tp,ultima:r.t,f:{},d:{},pagos:0,venta:0});
+    c.d[r.t]=1;c.f[r.f||('d'+r.t)]=1;c.pagos+=r.pg;c.venta+=r.a;if(r.cc)c.cods[r.cc]=1;if(r.inst)c.insts[r.inst]=1;
+    if(r.t>=c.ultima){c.ultima=r.t;c.sucursal=r.b;c.usuario=r.u;c.tp=r.tp}
+  }
+  resB=[];var tot=0,nsr=0,sum=0,pgS=0,vtS=0,B=[[days,days+29],[days+30,days+89],[days+90,days+179],[days+180,1e9]],cnt=[0,0,0,0];
+  for(k in map){
+    c=map[k];tot++;c.visitas=Object.keys(c.d).length;if(c.visitas<minv)continue;
+    c.nf=Object.keys(c.f).length;c.dias=Math.round((rt-c.ultima)/86400000);c.ultima=new Date(c.ultima);c.sin=c.dias>=days;
+    var cl=Object.keys(c.cods).sort(function(a,b){return a.length-b.length||(a<b?-1:1)});c.codigo=cl[0]||'';c.todos=cl.join(', ');c.inst=Object.keys(c.insts).sort().join(', ');
+    c.sucs=Object.keys(ab[k]||{}).sort().join(', ');c.estado=c.sin?'Sin retorno':'Activa';
+    c.pagos=Math.round(c.pagos*100)/100;c.venta=Math.round(c.venta*100)/100;
+    if(c.sin){nsr++;sum+=c.dias;pgS+=c.pagos;vtS+=c.venta;for(var j=0;j<4;j++){if(c.dias>=B[j][0]&&c.dias<=B[j][1]){cnt[j]++;break}}}
+    if(c.sin||all)resB.push(c);
+  }
+  $('b1').textContent=fm(tot);$('b2').textContent=fm(nsr);$('b3').textContent=(tot?(nsr/tot*100).toFixed(1):0)+'%';
+  $('b4').textContent=nsr?fm(Math.round(sum/nsr)):'0';
+  $('b5').textContent=idx.pg>=0?'L '+fm(pgS,2):(idx.a>=0?'L '+fm(vtS,2):'—');
+  $('b5s').textContent=idx.pg>=0&&idx.a>=0?'Venta: L '+fm(vtS,2):'';
+  Array.prototype.forEach.call($('chipsB').querySelectorAll('button'),function(b){b.classList.toggle('on',+b.dataset.d===days)});
+  $('noteB').textContent='Cuentas seleccionadas que no han comprado '+(bf?'en '+blabel(bf):'en ninguna sucursal')+(tpf?' con pago tipo '+tpf:'')+' en '+days+' días o más.';
+  if(adB)$('noteB').textContent+=' Solo productos que contienen «Adiuvo».';
+  if($('tmB').value)$('noteB').textContent+=' Tipo de medicamento: '+tmLbl($('tmB').value)+' (facturas con al menos un producto de ese tipo, completas).';
+  var mx=Math.max.apply(null,cnt.concat(1));
+  $('distB').innerHTML=B.map(function(b,j){var lb=b[1]>=1e9?b[0]+'+ días':b[0]+'–'+b[1]+' días';
+    return '<div class="bar s'+j+'"><span>'+lb+'</span><div class="tr"><i style="width:'+(cnt[j]/mx*100)+'%"></i></div><em>'+fm(cnt[j])+'</em></div>'}).join('');
+  colsB=[['codigo',idx.c1>=0?'Cód. cliente heredado':'Código'],['nombre','Cliente heredado'],['inst','Institución (cuenta)']];
+  if(idx.b>=0)colsB.push(['sucursal','Última sucursal'],['sucs','Compra en']);
+  if(idx.u>=0)colsB.push(['usuario','Usuario Factura']);
+  if(idx.tp>=0)colsB.push(['tp','Tipo Pago']);
+  colsB.push(['ultima','Última visita'],['dias','Días sin volver'],['visitas','Visitas'],['nf','Facturas']);
+  if(idx.pg>=0)colsB.push(['pagos','Pagos']);
+  if(idx.a>=0)colsB.push(['venta','Venta']);
+  if(all)colsB.push(['estado','Estado']);
+  if(!colsB.some(function(x){return x[0]===sortKB}))sortKB='dias';
+  $('theadB').innerHTML='<tr>'+colsB.map(function(x){return '<th data-k="'+x[0]+'">'+x[1]+' ⇅</th>'}).join('')+'</tr>';
+  Array.prototype.forEach.call($('theadB').querySelectorAll('th'),function(th){
+    th.onclick=function(){var kk=th.dataset.k;sortDB=(sortKB===kk)?-sortDB:-1;sortKB=kk;shownB=300;renderB()}});
+  shownB=300;renderB();
+}
+function viewB(){
+  var q=norm($('qB').value);
+  var l=resB.filter(function(c){return !q||norm(c.nombre+' '+c.sucursal+' '+(c.todos||'')).indexOf(q)>-1});
+  l.sort(function(a,b){var x=a[sortKB],y=b[sortKB];if(x instanceof Date){x=+x;y=+y}
+    if(typeof x==='string')return x.localeCompare(y,undefined,{numeric:true})*sortDB;return (x-y)*sortDB});
+  return l;
+}
+function renderB(){
+  var l=viewB(),s=l.slice(0,shownB);
+  $('tbodyB').innerHTML=s.map(function(c){return '<tr>'+colsB.map(function(k){var v=c[k[0]];
+    if(k[0]==='sucs')return '<td>'+(v?v.split(', ').map(function(b){return '<a href="#" class="bchip lkb" data-k="'+esc(c.key)+'" data-b="'+esc(b)+'" title="Ver facturas en '+esc(b)+'">'+esc(b)+'</a>'}).join(''):'—')+'</td>';
+    if(k[0]==='ultima')return '<td>'+fmtD(v)+'</td>';
+    if(k[0]==='dias')return '<td><span class="tag '+(v>=180?'t3':v>=90?'t2':'')+'">'+v+' días</span></td>';
+    if(k[0]==='visitas'||k[0]==='nf')return '<td class="n">'+fm(v)+'</td>';
+    if(k[0]==='pagos'||k[0]==='venta')return '<td class="n">'+fm(v,2)+'</td>';
+    if(k[0]==='codigo')return '<td class="cd">'+esc(v)+(c.cods&&Object.keys(c.cods).length>1?' <span class="bchip" title="'+esc(c.todos)+'">varios códigos</span>':'')+'</td>';
+    if(k[0]==='nombre')return '<td><a href="#" class="lk" data-k="'+esc(c.key)+'">'+esc(v)+'</a></td>';
+    if(k[0]==='estado')return '<td><span class="tag '+(c.sin?'t3':'okk')+'">'+esc(v)+'</span></td>';
+    return '<td>'+esc(v)+'</td>'}).join('')+'</tr>'}).join('')||'<tr><td colspan="'+(colsB.length||9)+'">Sin resultados con estos criterios.'+whyHidden($('qB').value,true)+'</td></tr>';
+  $('msgB').textContent='Mostrando '+fm(Math.min(shownB,l.length))+' de '+fm(l.length)+' cuentas (la descarga incluye todas).';
+  $('moreB').classList.toggle('hide',l.length<=shownB);
+}
+function matrixB(){
+  return [colsB.map(function(c){return c[1]})].concat(viewB().map(function(c){return colsB.map(function(k){var v=c[k[0]];return k[0]==='ultima'?iso(v):v})}));
+}
+function paramsB(){
+  var sel2=Object.keys(accB).filter(function(k){return selB[k]}).map(function(k){return accB[k].n}).join('; ');
+  return [['Parámetro','Valor'],['Reporte','Créditos e instituciones sin retorno'],['Solo productos que contienen Adiuvo',adB?'Sí':'No'],['Tipo de medicamento',tmLbl($('tmB').value)],['Catálogo de instituciones por código de cliente (col. L)',Object.keys(INSTC).map(function(c){return c+' = '+INSTC[c]}).join('; ')],['Generado',new Date().toLocaleString('es-HN')],['Fecha de referencia',$('refB').value],['Días sin volver (mínimo)',+$('daysB').value],['Visitas mínimas',+$('minvB').value],['Sucursal',sel('branchB')],['Tipo Pago',sel('tpB')],['Mostrar',sel('scopeB')],['Excluir devoluciones (líneas negativas)',$('exnegB').checked?'Sí':'No'],['Cuentas seleccionadas',sel2],['Cuentas en esta lista',viewB().length]];
+}
+function openClientB(key,br){
+  var c=resB.filter(function(x){return x.key===key})[0];
+  cur={key:key,name:c?c.nombre:key,l:getLines(key,recsB),tab:'c',br:br||'',code:c&&c.codigo?c.codigo:''};
+  showClient('c');
+}
+function showTab(t){
+  $('viewA').classList.toggle('hide',t!=='A');$('viewB').classList.toggle('hide',t!=='B');
+  $('tabA').classList.toggle('on',t==='A');$('tabB').classList.toggle('on',t==='B');
+}
+var tmB;function laterB(){clearTimeout(tmB);tmB=setTimeout(calcB,250)}
+$('tabA').onclick=function(){showTab('A')};$('tabB').onclick=function(){showTab('B')};
+['daysB','minvB','refB'].forEach(function(i){$(i).addEventListener('input',laterB)});
+['branchB','tpB','scopeB','exnegB'].forEach(function(i){$(i).onchange=calcB});
+$('chipsB').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;$('daysB').value=b.dataset.d;calcB()});
+$('qB').oninput=function(){shownB=300;renderB()};
+$('moreB').onclick=function(){shownB+=500;renderB()};
+$('pickQ').oninput=filterPick;
+$('pickL').addEventListener('change',function(e){var k=e.target.dataset.k;if(k===undefined)return;selB[k]=e.target.checked;updPickT();calcB()});
+$('pBC').onclick=function(){setPick(isBC)};
+$('pINST').onclick=function(){setPick(function(k){return INST.test(k)||INSTK[k]!==undefined})};
+$('pALL').onclick=function(){setPick(function(){return true})};
+$('pNONE').onclick=function(){setPick(function(){return false})};
+$('tbodyB').addEventListener('click',function(e){var bb=e.target.closest('a.lkb');if(bb){e.preventDefault();openClientB(bb.dataset.k,bb.dataset.b);return}var a=e.target.closest('a.lk');if(!a)return;e.preventDefault();openClientB(a.dataset.k)});
+$('csvB').onclick=function(){var m=matrixB(),j=colsB.map(function(c){return c[0]}).indexOf('codigo');
+  if(j>=0)for(var i=1;i<m.length;i++){var v=String(m[i][j]);if(/^\d{6,}$/.test(v)||/^0\d+$/.test(v))m[i][j]='="'+v+'"'}
+  save('creditos_instituciones_sin_retorno.csv',toCSV(m),'text/csv;charset=utf-8')};
+$('copyB').onclick=function(){var t=matrixB().map(function(r){return r.join('\t')}).join('\n'),b=$('copyB');
+  (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){b.textContent='¡Copiado!'},function(){b.textContent='No se pudo copiar'});
+  setTimeout(function(){b.textContent='Copiar'},1800)};
+$('xlsxB').onclick=function(){
+  if(typeof XLSX==='undefined'){alert('No se pudo cargar la librería de Excel (necesita internet). Usa Descargar CSV: se abre directo en Excel.');return}
+  try{
+    var m=matrixB(),ks=colsB.map(function(c){return c[0]}),dj=ks.indexOf('ultima'),i;
+    var mj=[ks.indexOf('pagos'),ks.indexOf('venta')].filter(function(x){return x>=0}),cj=ks.indexOf('codigo');
+    if(dj>=0){for(i=1;i<m.length;i++){var p=String(m[i][dj]).split('-');m[i][dj]=Math.round(Date.UTC(+p[0],+p[1]-1,+p[2])/86400000)+25569}}
+    var ws=XLSX.utils.aoa_to_sheet(m);
+    for(i=1;i<m.length;i++){
+      if(dj>=0){var a1=ws[XLSX.utils.encode_cell({r:i,c:dj})];if(a1)a1.z='dd/mm/yyyy'}
+      mj.forEach(function(j){var b1=ws[XLSX.utils.encode_cell({r:i,c:j})];if(b1)b1.z='#,##0.00'});
+      if(cj>=0){var t1=ws[XLSX.utils.encode_cell({r:i,c:cj})];if(t1){t1.t='s';t1.v=String(t1.v);t1.z='@'}}
+    }
+    ws['!cols']=m[0].map(function(h,j){var w=String(h).length;for(var k=1;k<Math.min(m.length,300);k++){var l=String(m[k][j]).length;if(l>w)w=l}return{wch:Math.min(Math.max(w+2,10),50)}});
+    ws['!autofilter']={ref:ws['!ref']};
+    var wb2=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb2,ws,'Créditos sin retorno');
+    var wp=XLSX.utils.aoa_to_sheet(paramsB());wp['!cols']=[{wch:44},{wch:60}];XLSX.utils.book_append_sheet(wb2,wp,'Parámetros');
+    save('creditos_instituciones_sin_retorno.xlsx',XLSX.write(wb2,{bookType:'xlsx',type:'array'}),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  }catch(x){alert('No se pudo generar el Excel: '+x.message+'. Usa Descargar CSV.')}
+};
 try{if(window.claude&&claude.use){claude.use('downloads').then(function(d){dl=d;}).catch(function(){})}}catch(e){}
 })();
 </script>
