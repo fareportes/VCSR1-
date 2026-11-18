@@ -1460,6 +1460,8 @@ td.cd {
 }
 .del{height:30px;padding:0 10px;color:var(--t3f)}
 #flist td:first-child{color:var(--mu)}
+select.cat{width:auto;min-width:150px;height:30px;padding:0 8px;font-size:.8rem}
+select.cat.on{border-color:var(--ac);background:var(--acs);color:var(--ac);font-weight:600}
 .vw{height:30px;padding:0 10px;margin-right:6px}
 .vw[aria-expanded='true']{background:var(--acs);border-color:var(--ac);color:var(--ac)}
 #flist tr.pvr>td{background:var(--zb);padding:12px 14px;white-space:normal}
@@ -1473,6 +1475,11 @@ td.cd {
 .pvt th:hover{background:var(--sf)}
 .pvt td{white-space:nowrap;max-width:260px;overflow:hidden;text-overflow:ellipsis}
 .pvt td.ln{color:var(--mu);text-align:right;font-variant-numeric:tabular-nums}
+.barD{display:grid;grid-template-columns:200px 1fr 120px;gap:12px;align-items:center;font-size:.88rem}
+.barD .tr{height:12px;border-radius:6px;background:var(--bg);overflow:hidden}
+.barD i{display:block;height:100%;border-radius:6px;min-width:3px}
+.barD em{font-style:normal;text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+@media (max-width:640px){.barD{grid-template-columns:1fr 90px}.barD .tr{grid-column:1/3;order:3}}
 </style>
 </head>
 <body class="fit">
@@ -1482,7 +1489,7 @@ td.cd {
   <p class="sub">Sube tu archivo de ventas y filtra a quienes dejaron de visitar la sucursal. Los datos se procesan en tu navegador y se guardan en caché para no volver a subirlos.</p>
 </header>
 
-<div class="row tabs navt"><button id="tabF">Archivos</button><button id="tabA" class="on">Clientes sin retorno</button><button id="tabB">Créditos e instituciones</button></div>
+<div class="row tabs navt"><button id="tabF">Archivos</button><button id="tabA" class="on">Clientes sin retorno</button><button id="tabB">Créditos e instituciones</button><button id="tabD">Resumen de llamadas</button></div>
 
 <div id="viewF" class="hide">
 <section class="panel">
@@ -1558,15 +1565,17 @@ td.cd {
   </div>
   <div class="card">
     <div class="row" style="justify-content:space-between;margin-bottom:12px">
-      <input type="search" id="q" placeholder="Buscar por código, nombre, cédula o teléfono…" style="max-width:280px">
+      <div class="row" style="gap:8px"><input type="search" id="q" placeholder="Buscar por código, nombre, cédula o teléfono…" style="max-width:280px"><select id="catF" title="Filtrar por categoría de llamada" style="max-width:220px"></select></div>
       <div class="row">
         <button id="fit" class="on" title="Ver todas las columnas en la pantalla sin desplazarte">Ajustar a pantalla</button>
         <details class="colmenu"><summary>Columnas</summary><div class="colbox" id="colbox"></div></details>
         <button id="copy">Copiar</button>
+        <button id="clrCalls" type="button" title="Quita todas las categorías de llamada marcadas">Borrar marcas</button>
         <button id="csv" class="p">Descargar CSV</button>
         <button id="xlsx">Descargar Excel</button>
       </div>
     </div>
+    <p class="note" id="callSum" style="margin:0 0 8px"></p>
     <div class="tw"><table><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
     <div class="row" style="margin-top:8px"><p class="note" id="msg" style="margin:0"></p><button id="more" class="hide">Ver más</button></div>
   </div>
@@ -1614,11 +1623,41 @@ td.cd {
   <div class="card"><h2>¿Hace cuánto no vuelven?</h2><div class="bars" id="distB"></div></div>
   <div class="card">
    <div class="row" style="justify-content:space-between;margin-bottom:12px">
-    <input type="search" id="qB" placeholder="Buscar por código, nombre, teléfono o sucursal…" style="max-width:280px">
+    <div class="row" style="gap:8px"><input type="search" id="qB" placeholder="Buscar por código, nombre, teléfono o sucursal…" style="max-width:280px"><select id="catFB" title="Filtrar por categoría de llamada" style="max-width:220px"></select></div>
     <div class="row"><button id="copyB">Copiar</button><button id="csvB" class="p">Descargar CSV</button><button id="xlsxB">Descargar Excel</button></div>
    </div>
+   <p class="note" id="callSumB" style="margin:0 0 8px"></p>
    <div class="tw"><table><thead id="theadB"></thead><tbody id="tbodyB"></tbody></table></div>
    <div class="row" style="margin-top:8px"><p class="note" id="msgB" style="margin:0"></p><button id="moreB" class="hide">Ver más</button></div>
+  </div>
+ </div>
+</div>
+
+<div id="viewD" class="hide">
+ <section class="card">
+  <h2 style="font-size:1.25rem;margin:0 0 4px">Resumen de llamadas</h2>
+  <p class="note" style="margin:0">Se actualiza con las categorías que vas marcando en las hojas «Clientes sin retorno» y «Créditos e instituciones». Cuenta a cada cliente una sola vez, aunque aparezca en las dos hojas, y toma los clientes de las listas tal como están filtradas ahora.</p>
+ </section>
+ <div id="emptyD" class="card note">Sube el archivo de ventas y marca categorías de llamada para ver el resumen.</div>
+ <div id="outD" class="hide">
+  <section class="panel">
+   <div class="grid"><div class="f"><label for="srcD">Clientes a resumir</label><select id="srcD"><option value="all">Ambas hojas</option><option value="A">Solo Clientes sin retorno</option><option value="B">Solo Créditos e instituciones</option></select></div></div>
+   <p class="note" id="noteD" style="margin:10px 0 0"></p>
+  </section>
+  <div class="strip">
+   <div class="lead"><b id="d1">0</b><span>clientes llamados</span></div>
+   <div><b id="d2">0%</b><span>de avance sobre la lista</span></div>
+   <div><b id="d3">0</b><span>clientes sin llamar</span></div>
+   <div title="No contestó + Número equivocado"><b id="d4">0</b><span>sin contacto (no contestó / número equivocado)</span></div>
+   <div title="Suma de la columna Pagos de los clientes llamados"><b id="d5" style="font-size:1.3rem;overflow-wrap:anywhere">0</b><span>en pagos de los clientes llamados</span></div>
+  </div>
+  <div class="card"><h2>¿Qué respondieron los clientes llamados?</h2><div class="bars" id="barsD"></div></div>
+  <div class="card">
+   <div class="row" style="justify-content:space-between;margin-bottom:12px"><h2 style="margin:0">Detalle por categoría</h2><div class="row"><button id="csvD" class="p">Descargar CSV</button><button id="xlsxD">Descargar Excel</button></div></div>
+   <div class="tw"><table><thead><tr><th>Categoría</th><th>Clientes</th><th>% de llamados</th><th>% de la lista</th><th>Pagos (L)</th></tr></thead><tbody id="tbCatD"></tbody></table></div>
+  </div>
+  <div class="card"><h2>Avance por sucursal</h2><p class="note" style="margin:0 0 10px">Según la última sucursal donde compró el cliente.</p>
+   <div class="tw"><table><thead><tr><th>Sucursal</th><th>Clientes</th><th>Llamados</th><th>Sin llamar</th><th>% de avance</th></tr></thead><tbody id="tbSucD"></tbody></table></div>
   </div>
  </div>
 </div>
@@ -2747,7 +2786,7 @@ td.cd {
         ? fm(skipName) +
           ' filas ignoradas por cliente genérico o vacío (consumidor final, descuentos, aseguradoras…). '
         : '') + (skipDate ? skipDate + ' sin fecha válida. ' : '');
-    cols = (idx.c1 >= 0 || idx.c2 >= 0 ? [['codigo', 'Código']] : []).concat([['nombre', 'Cliente']]);
+    cols = (idx.c1 >= 0 || idx.c2 >= 0 ? [['codigo', 'Código']] : []).concat([['nombre', 'Cliente'], ['cat', 'Categoría']]);
     if (nLc) cols.push(['cuenta', 'Descuento / cuenta']);
     if (idx.ce >= 0) cols.push(['ce', 'Cédula']);
     if (idx.tl >= 0 || phN) cols.push(['tl', 'Teléfono']);
@@ -2834,9 +2873,15 @@ td.cd {
         ).indexOf(q) > -1
       );
     });
+    var cf = $('catF').value;
+    if (cf)
+      l = l.filter(function (c) {
+        var v = calls[c.key] || '';
+        return cf === '_' ? !v : v === cf;
+      });
     l.sort(function (a, b) {
-      var x = a[sortK],
-        y = b[sortK];
+      var x = sortK === 'cat' ? calls[a.key] || '' : a[sortK],
+        y = sortK === 'cat' ? calls[b.key] || '' : b[sortK];
       if (x instanceof Date) {
         x = +x;
         y = +y;
@@ -2928,6 +2973,247 @@ td.cd {
       '</ul></div>'
     );
   }
+  var CATS = [
+    'Se fue a la competencia',
+    'Compra en otra FA',
+    'Falleció',
+    'No necesita medicamentos',
+    'No contestó',
+    'Número equivocado',
+    'Otras razones',
+    'Compran en independientes',
+  ];
+  var CK = 'cnr_llamadas_v1',
+    calls = {};
+  try {
+    calls = JSON.parse(localStorage.getItem(CK) || '{}') || {};
+  } catch (e) {
+    calls = {};
+  }
+  function saveCalls() {
+    try {
+      localStorage.setItem(CK, JSON.stringify(calls));
+    } catch (e) {
+      $('callSum').textContent = 'No se pudieron guardar las marcas en este navegador; se pierden al cerrar la página (usa Descargar Excel para conservarlas).';
+    }
+  }
+  $('catF').innerHTML =
+    '<option value="">Llamadas: todos</option><option value="_">Sin llamar</option>' +
+    CATS.map(function (n) {
+      return '<option value="' + esc(n) + '">' + esc(n) + '</option>';
+    }).join('');
+  function catCell(key) {
+    var v = calls[key] || '';
+    return (
+      '<td><select class="cat' + (v ? ' on' : '') + '" data-ck="' + esc(key) + '" aria-label="Categoría de llamada"><option value="">— Sin llamar —</option>' +
+      CATS.map(function (n) {
+        return '<option value="' + esc(n) + '"' + (n === v ? ' selected' : '') + '>' + esc(n) + '</option>';
+      }).join('') +
+      '</select></td>'
+    );
+  }
+  function updCalls() {
+    if (!result.length) {
+      $('callSum').textContent = '';
+      return;
+    }
+    var cnt = {}, done = 0;
+    result.forEach(function (c) {
+      var v = calls[c.key];
+      if (v) {
+        done++;
+        cnt[v] = (cnt[v] || 0) + 1;
+      }
+    });
+    $('callSum').textContent =
+      'Llamados: ' + fm(done) + ' de ' + fm(result.length) + ' (' + Math.round((done * 100) / result.length) + '%)' +
+      CATS.filter(function (n) {
+        return cnt[n];
+      })
+        .map(function (n) {
+          return ' · ' + n + ': ' + fm(cnt[n]);
+        })
+        .join('');
+  }
+
+  var DCOL = ['--k2f', '--k1f', '--s3', '--k3f', '--k4f', '--ok', '--t2f', '--mu'];
+  var dData = null;
+  function renderD() {
+    var src = $('srcD').value,
+      rec = {};
+    if (src !== 'B')
+      result.forEach(function (c) {
+        rec[c.key] = { p: c.pagos || 0, s: c.sucursal || 'Sin sucursal' };
+      });
+    if (src !== 'A')
+      resB.forEach(function (c) {
+        if (c.sin && !rec[c.key]) rec[c.key] = { p: c.pagos || 0, s: c.sucursal || 'Sin sucursal' };
+      });
+    var keys = Object.keys(rec),
+      total = keys.length;
+    $('emptyD').classList.toggle('hide', total > 0);
+    $('outD').classList.toggle('hide', total === 0);
+    if (!total) {
+      dData = null;
+      return;
+    }
+    var cat = {},
+      br = {},
+      done = 0,
+      pg = 0,
+      sinCont = 0,
+      lp = 0;
+    CATS.forEach(function (n) {
+      cat[n] = { n: 0, p: 0 };
+    });
+    keys.forEach(function (k) {
+      var r = rec[k],
+        v = calls[k],
+        b = br[r.s] || (br[r.s] = { n: 0, d: 0 });
+      b.n++;
+      if (v && cat[v]) {
+        b.d++;
+        done++;
+        cat[v].n++;
+        cat[v].p += r.p;
+        pg += r.p;
+      } else lp += r.p;
+    });
+    sinCont = cat['No contestó'].n + cat['Número equivocado'].n;
+    var out = Object.keys(calls).filter(function (k) {
+      return !rec[k];
+    }).length;
+    $('d1').textContent = fm(done);
+    $('d2').textContent = Math.round((done * 100) / total) + '%';
+    $('d3').textContent = fm(total - done);
+    $('d4').textContent = fm(sinCont);
+    $('d5').textContent = 'L ' + fm(pg, 2);
+    $('noteD').textContent =
+      'Lista actual: ' + fm(total) + ' clientes.' +
+      (out ? ' Hay ' + fm(out) + ' marcas de clientes que ahora no aparecen en esta lista (por los filtros o la hoja elegida); no se cuentan aquí.' : '');
+    var mx = Math.max.apply(null, CATS.map(function (n) { return cat[n].n; }).concat([1]));
+    $('barsD').innerHTML = done
+      ? CATS.map(function (n, i) {
+          var c = cat[n];
+          return (
+            '<div class="barD"><span>' + esc(n) + '</span><div class="tr"><i style="width:' + Math.round((c.n * 100) / mx) +
+            '%;background:var(' + DCOL[i % DCOL.length] + ')"></i></div><em>' + fm(c.n) + ' · ' +
+            Math.round((c.n * 100) / done) + '%</em></div>'
+          );
+        }).join('')
+      : '<p class="note" style="margin:0">Todavía no has marcado ninguna llamada en esta lista.</p>';
+    var rows = CATS.map(function (n) {
+      return [n, cat[n].n, done ? Math.round((cat[n].n * 1000) / done) / 10 : 0, Math.round((cat[n].n * 1000) / total) / 10, Math.round(cat[n].p * 100) / 100];
+    });
+    rows.push(['Sin llamar', total - done, '', Math.round(((total - done) * 1000) / total) / 10, Math.round(lp * 100) / 100]);
+    rows.push(['Total', total, '', 100, Math.round((pg + lp) * 100) / 100]);
+    $('tbCatD').innerHTML = rows
+      .map(function (r, i) {
+        return (
+          '<tr' + (i >= CATS.length ? ' style="font-weight:700"' : '') + '><td>' + esc(r[0]) + '</td><td class="n">' + fm(r[1]) +
+          '</td><td class="n">' + (r[2] === '' ? '—' : r[2] + '%') + '</td><td class="n">' + r[3] + '%</td><td class="n">' + fm(r[4], 2) + '</td></tr>'
+        );
+      })
+      .join('');
+    var bl = Object.keys(br).sort(function (a, b) {
+      return br[b].n - br[a].n;
+    });
+    $('tbSucD').innerHTML = bl
+      .map(function (k) {
+        var b = br[k];
+        return (
+          '<tr><td>' + esc(k) + '</td><td class="n">' + fm(b.n) + '</td><td class="n">' + fm(b.d) + '</td><td class="n">' + fm(b.n - b.d) +
+          '</td><td class="n">' + Math.round((b.d * 100) / b.n) + '%</td></tr>'
+        );
+      })
+      .join('');
+    var m = [['Categoría', 'Clientes', '% de llamados', '% de la lista', 'Pagos (L)']].concat(rows);
+    m.push([], ['Sucursal', 'Clientes', 'Llamados', 'Sin llamar', '% de avance']);
+    bl.forEach(function (k) {
+      m.push([k, br[k].n, br[k].d, br[k].n - br[k].d, Math.round((br[k].d * 1000) / br[k].n) / 10]);
+    });
+    dData = m;
+  }
+  $('srcD').onchange = renderD;
+  $('csvD').onclick = function () {
+    if (!dData) return;
+    localSave('resumen-llamadas.csv', new Blob([toCSV(dData)], { type: 'text/csv;charset=utf-8' }));
+  };
+  $('xlsxD').onclick = function () {
+    if (!dData) return;
+    if (typeof XLSX === 'undefined') {
+      alert('No se pudo cargar la librería de Excel (necesita internet). Usa Descargar CSV: se abre directo en Excel.');
+      return;
+    }
+    try {
+      var wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(dData), 'Resumen llamadas');
+      XLSX.writeFile(wb, 'resumen-llamadas.xlsx');
+    } catch (e) {
+      alert('No se pudo crear el Excel. Usa Descargar CSV.');
+    }
+  };
+  $('catFB').innerHTML = $('catF').innerHTML;
+  function updCallsB() {
+    if (!resB.length) {
+      $('callSumB').textContent = '';
+      return;
+    }
+    var cnt = {}, done = 0;
+    resB.forEach(function (c) {
+      var v = calls[c.key];
+      if (v) {
+        done++;
+        cnt[v] = (cnt[v] || 0) + 1;
+      }
+    });
+    $('callSumB').textContent =
+      'Llamados: ' + fm(done) + ' de ' + fm(resB.length) + ' (' + Math.round((done * 100) / resB.length) + '%)' +
+      CATS.filter(function (n) {
+        return cnt[n];
+      })
+        .map(function (n) {
+          return ' · ' + n + ': ' + fm(cnt[n]);
+        })
+        .join('');
+  }
+  $('tbodyB').addEventListener('change', function (e) {
+    var el = e.target.closest('select[data-ck]');
+    if (!el) return;
+    var k = el.dataset.ck;
+    if (el.value) calls[k] = el.value;
+    else delete calls[k];
+    saveCalls();
+    el.classList.toggle('on', !!el.value);
+    if ($('catFB').value || sortKB === 'cat') renderB();
+    else updCallsB();
+  });
+  $('catFB').onchange = function () {
+    shownB = 300;
+    renderB();
+  };
+  $('tbody').addEventListener('change', function (e) {
+    var el = e.target.closest('select[data-ck]');
+    if (!el) return;
+    var k = el.dataset.ck;
+    if (el.value) calls[k] = el.value;
+    else delete calls[k];
+    saveCalls();
+    el.classList.toggle('on', !!el.value);
+    if ($('catF').value || sortK === 'cat') render();
+    else updCalls();
+  });
+  $('catF').onchange = function () {
+    shown = 300;
+    render();
+  };
+  $('clrCalls').onclick = function () {
+    if (!Object.keys(calls).length || !confirm('¿Borrar todas las marcas de llamadas?')) return;
+    calls = {};
+    saveCalls();
+    render();
+    if (resB.length) renderB();
+  };
   function render() {
     var l = view(),
       s = l.slice(0, shown);
@@ -2939,6 +3225,7 @@ td.cd {
             cols
               .map(function (k) {
                 var v = c[k[0]];
+                if (k[0] === 'cat') return catCell(c.key);
                 if (k[0] === 'sucs')
                   return (
                     '<td>' +
@@ -3005,6 +3292,7 @@ td.cd {
       info +
       '';
     $('more').classList.toggle('hide', l.length <= shown);
+    updCalls();
   }
   function matrix() {
     return [
@@ -3014,7 +3302,7 @@ td.cd {
     ].concat(
       view().map(function (c) {
         return cols.map(function (k) {
-          var v = c[k[0]];
+          var v = k[0] === 'cat' ? calls[c.key] || '' : c[k[0]];
           return k[0] === 'ultima' ? iso(v) : v;
         });
       }),
@@ -4447,6 +4735,7 @@ td.cd {
     colsB = [
       ['codigo', idx.c1 >= 0 ? 'Cód. cliente heredado' : 'Código'],
       ['nombre', 'Cliente heredado'],
+      ['cat', 'Categoría'],
       ['inst', 'Institución (cuenta)'],
     ];
     if (phN) colsB.push(['tl', 'Teléfono'], ['cel', 'Celular']);
@@ -4501,9 +4790,15 @@ td.cd {
         ).indexOf(q) > -1
       );
     });
+    var cfB = $('catFB').value;
+    if (cfB)
+      l = l.filter(function (c) {
+        var v = calls[c.key] || '';
+        return cfB === '_' ? !v : v === cfB;
+      });
     l.sort(function (a, b) {
-      var x = a[sortKB],
-        y = b[sortKB];
+      var x = sortKB === 'cat' ? calls[a.key] || '' : a[sortKB],
+        y = sortKB === 'cat' ? calls[b.key] || '' : b[sortKB];
       if (x instanceof Date) {
         x = +x;
         y = +y;
@@ -4524,6 +4819,7 @@ td.cd {
             colsB
               .map(function (k) {
                 var v = c[k[0]];
+                if (k[0] === 'cat') return catCell(c.key);
                 if (k[0] === 'sucs')
                   return (
                     '<td>' +
@@ -4590,6 +4886,7 @@ td.cd {
       fm(l.length) +
       ' cuentas (la descarga incluye todas).';
     $('moreB').classList.toggle('hide', l.length <= shownB);
+    updCallsB();
   }
   function matrixB() {
     return [
@@ -4599,7 +4896,7 @@ td.cd {
     ].concat(
       viewB().map(function (c) {
         return colsB.map(function (k) {
-          var v = c[k[0]];
+          var v = k[0] === 'cat' ? calls[c.key] || '' : c[k[0]];
           return k[0] === 'ultima' ? iso(v) : v;
         });
       }),
@@ -4658,7 +4955,10 @@ td.cd {
       bDirty = false;
       buildB();
     }
-    ['A', 'B', 'F'].forEach(function (x) {
+    if (t === 'B' && resB.length) renderB();
+    if (t === 'A' && result.length) render();
+    if (t === 'D') renderD();
+    ['A', 'B', 'F', 'D'].forEach(function (x) {
       $('view' + x).classList.toggle('hide', t !== x);
       $('tab' + x).classList.toggle('on', t === x);
     });
@@ -4673,6 +4973,9 @@ td.cd {
   };
   $('tabB').onclick = function () {
     showTab('B');
+  };
+  $('tabD').onclick = function () {
+    showTab('D');
   };
   ['daysB', 'minvB', 'refB'].forEach(function (i) {
     $(i).addEventListener('input', laterB);
