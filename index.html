@@ -1489,7 +1489,7 @@ select.cat.on{border-color:var(--ac);background:var(--acs);color:var(--ac);font-
   <p class="sub">Sube tu archivo de ventas y filtra a quienes dejaron de visitar la sucursal. Los datos se procesan en tu navegador y se guardan en caché para no volver a subirlos.</p>
 </header>
 
-<div class="row tabs navt"><button id="tabF">Archivos</button><button id="tabA" class="on">Clientes sin retorno</button><button id="tabB">Créditos e instituciones</button><button id="tabD">Resumen de llamadas</button></div>
+<div class="row tabs navt"><button id="tabF">Archivos</button><button id="tabA" class="on">Clientes sin retorno</button><button id="tabB">Créditos e instituciones</button><button id="tabE">Domicilio → Local</button><button id="tabD">Resumen de llamadas</button></div>
 
 <div id="viewF" class="hide">
 <section class="panel">
@@ -1629,6 +1629,43 @@ select.cat.on{border-color:var(--ac);background:var(--acs);color:var(--ac);font-
    <p class="note" id="callSumB" style="margin:0 0 8px"></p>
    <div class="tw"><table><thead id="theadB"></thead><tbody id="tbodyB"></tbody></table></div>
    <div class="row" style="margin-top:8px"><p class="note" id="msgB" style="margin:0"></p><button id="moreB" class="hide">Ver más</button></div>
+  </div>
+ </div>
+</div>
+
+<div id="viewE" class="hide">
+ <section class="card">
+  <h2 style="font-size:1.25rem;margin:0 0 4px">Domicilio → Local en la misma FA</h2>
+  <p class="note" style="margin:0">Clientes que antes compraban a domicilio y ahora compran en local <b>dentro de una misma sucursal (FA)</b>. Se revisa, por cliente y sucursal, el historial de facturas según la columna «Tipo Entrega»: aparecen quienes tienen compras a domicilio y, después de la última, solo compras en local.</p>
+ </section>
+ <div id="emptyE" class="card note">Sube el archivo de ventas arriba para analizar estos clientes.</div>
+ <div id="outE" class="hide">
+  <section class="panel">
+   <div class="grid">
+    <div class="f"><label for="branchE">Sucursal (FA)</label><select id="branchE"><option value="">Todas</option></select></div>
+    <div class="f"><label for="patE">Tipo de cambio</label><select id="patE"><option value="all">Todos los que cambiaron</option><option value="clean">Cambio total (no volvieron a domicilio)</option><option value="mixed">Alternan (ya habían comprado local antes)</option></select></div>
+    <div class="f"><label for="curE">Cuenta como «local»</label><select id="curE"><option value="local">Solo Tipo Entrega = Local</option><option value="nodom">Cualquier canal distinto de Domicilio</option></select></div>
+    <div class="f"><label for="minDE">Mín. compras a domicilio</label><input type="number" id="minDE" min="1" value="1"></div>
+    <div class="f"><label for="minLE">Mín. compras en local después</label><input type="number" id="minLE" min="1" value="1"></div>
+    <div class="f"><label for="daysE">Compró en los últimos (días)</label><input type="number" id="daysE" min="0" value="0"><small class="hint">0 = sin límite</small></div>
+    <div class="f" style="padding-top:22px"><label class="chk"><input type="checkbox" id="exnegE" checked> Excluir devoluciones (líneas negativas)</label></div>
+   </div>
+   <p class="note" id="noteE" style="margin:14px 0 0"></p>
+  </section>
+  <div class="strip">
+   <div class="lead"><b id="ke1">0</b><span>clientes pasaron de domicilio a local</span></div>
+   <div><b id="ke2">0%</b><span>de los clientes que compraban a domicilio</span></div>
+   <div><b id="ke3">0</b><span>clientes con compras a domicilio</span></div>
+   <div><b id="ke4">0</b><span>días entre su último domicilio y su primera compra local, en promedio</span></div>
+   <div title="Suma de la columna Pagos de las compras locales posteriores al último domicilio"><b id="ke5" style="font-size:1.3rem;overflow-wrap:anywhere">0</b><span>en pagos locales después del cambio</span></div>
+  </div>
+  <div class="card">
+   <div class="row" style="justify-content:space-between;margin-bottom:12px">
+    <div class="row" style="gap:8px"><input type="search" id="qE" placeholder="Buscar por código, nombre, teléfono o sucursal…" style="max-width:280px"></div>
+    <div class="row"><button id="copyE">Copiar</button><button id="csvE" class="p">Descargar CSV</button><button id="xlsxE">Descargar Excel</button></div>
+   </div>
+   <div class="tw"><table><thead id="theadE"></thead><tbody id="tbodyE"></tbody></table></div>
+   <div class="row" style="margin-top:8px"><p class="note" id="msgE" style="margin:0"></p><button id="moreE" class="hide">Ver más</button></div>
   </div>
  </div>
 </div>
@@ -3720,6 +3757,7 @@ select.cat.on{border-color:var(--ac);background:var(--acs);color:var(--ac);font-
         p: gv(w, idx.p),
         c: gv(w, idx.cat),
         cd: gv(w, idx.cd),
+        te: gv(w, idx.te),
         tp: gv(w, idx.tp),
         q: nv(w, idx.q),
         pr: nv(w, idx.pr),
@@ -3788,13 +3826,13 @@ select.cat.on{border-color:var(--ac);background:var(--acs);color:var(--ac);font-
       L.forEach(function (x) {
         var k = x.f || 's' + x.t;
         if (!I[k]) {
-          I[k] = { f: x.f, t: x.t, n: 0 };
+          I[k] = { f: x.f, t: x.t, n: 0, te: x.te };
           ord.push(k);
         }
         I[k].n++;
       });
       h +=
-        '<div class="tw"><table><thead><tr><th>Fecha</th><th>Factura</th><th>Productos en la factura</th></tr></thead><tbody>' +
+        '<div class="tw"><table><thead><tr><th>Fecha</th><th>Factura</th><th>Productos en la factura</th><th>Entrega</th></tr></thead><tbody>' +
         ord
           .map(function (k) {
             var e = I[k];
@@ -3808,6 +3846,8 @@ select.cat.on{border-color:var(--ac);background:var(--acs);color:var(--ac);font-
               '</td><td>' +
               fm(e.n) +
               (e.n === 1 ? ' producto' : ' productos') +
+              '</td><td>' +
+              esc(e.te || '—') +
               '</td></tr>'
             );
           })
@@ -4958,7 +4998,8 @@ select.cat.on{border-color:var(--ac);background:var(--acs);color:var(--ac);font-
     if (t === 'B' && resB.length) renderB();
     if (t === 'A' && result.length) render();
     if (t === 'D') renderD();
-    ['A', 'B', 'F', 'D'].forEach(function (x) {
+    if (t === 'E') calcE();
+    ['A', 'B', 'F', 'D', 'E'].forEach(function (x) {
       $('view' + x).classList.toggle('hide', t !== x);
       $('tab' + x).classList.toggle('on', t === x);
     });
@@ -4968,6 +5009,242 @@ select.cat.on{border-color:var(--ac);background:var(--acs);color:var(--ac);font-
     clearTimeout(tmB);
     tmB = setTimeout(calcB, 250);
   }
+  /* ===== Hoja: Domicilio → Local (misma FA) ===== */
+  var resE = [], colsE = [], sortKE = 'cambio', sortDE = -1, shownE = 300, tmE;
+  var CE = [['codigo', 'Código'], ['nombre', 'Cliente'], ['sucursal', 'FA'], ['tl', 'Teléfono'], ['cel', 'Celular'], ['nD', 'Compras a domicilio'], ['primD', 'Primer domicilio'], ['ultD', 'Último domicilio'], ['cambio', 'Primera compra local'], ['nLa', 'Compras locales después'], ['ultL', 'Última compra'], ['dias', 'Días sin comprar'], ['gap', 'Días entre domicilio y local'], ['pat', 'Patrón'], ['pgD', 'Pagos domicilio'], ['pgL', 'Pagos local']];
+  var CED = { primD: 1, ultD: 1, cambio: 1, ultL: 1 };
+  function teCls(te, mode) {
+    var n = norm(te);
+    if (n === 'domicilio') return 'D';
+    if (mode === 'local') return n === 'local' ? 'L' : '';
+    return n ? 'L' : '';
+  }
+  function laterE() {
+    clearTimeout(tmE);
+    tmE = setTimeout(calcE, 250);
+  }
+  function calcE() {
+    var hasTe = recs.length && idx.te >= 0;
+    $('emptyE').classList.toggle('hide', !!hasTe);
+    $('emptyE').textContent = recs.length
+      ? 'El archivo no tiene la columna «Tipo Entrega»; sin ella no se puede distinguir domicilio de local.'
+      : 'Sube el archivo de ventas arriba para analizar estos clientes.';
+    $('outE').classList.toggle('hide', !hasTe);
+    if (!hasTe) return;
+    var i, bs = {};
+    for (i = 0; i < recs.length; i++) if (recs[i].b) bs[recs[i].b] = 1;
+    var bk = Object.keys(bs).sort(), bsel = $('branchE');
+    if (bsel.dataset.k !== bk.join('|')) {
+      var cv = bsel.value;
+      bsel.innerHTML = '<option value="">Todas (' + bk.length + ')</option>' + bk.map(function (k) {
+        return '<option value="' + esc(k) + '">' + esc(blabel(k)) + '</option>';
+      }).join('');
+      bsel.dataset.k = bk.join('|');
+      if (bk.indexOf(cv) > -1) bsel.value = cv;
+    }
+    var mode = $('curE').value, pat = $('patE').value, bf = bsel.value, exn = $('exnegE').checked,
+      minD = Math.max(1, +$('minDE').value || 1), minL = Math.max(1, +$('minLE').value || 1),
+      dlim = Math.max(0, +$('daysE').value || 0),
+      ref = $('ref').value ? new Date($('ref').value + 'T00:00:00') : new Date(+maxD);
+    ref.setHours(0, 0, 0, 0);
+    var rt = +ref, g = Object.create(null);
+    for (i = 0; i < recs.length; i++) {
+      var r = recs[i];
+      if (r.t > rt || (bf && r.b !== bf) || (exn && (r.pg < 0 || r.a < 0))) continue;
+      var cl = teCls(r.te, mode);
+      if (!cl) continue;
+      var gk = r.k + '\u0001' + r.b,
+        e = g[gk] || (g[gk] = { key: r.k, b: r.b, n: r.n, cods: {}, cx: {}, tl: '', inv: {} }),
+        ik = r.fk || 'd' + r.t,
+        v = e.inv[ik] || (e.inv[ik] = { t: r.t, c: cl, pg: 0, n: parseFloat(String(r.fk).split('|')[0]) || 0 });
+      v.pg += r.pg;
+      if (r.cc) e.cods[r.cc] = 1;
+      if (r.c1) e.cx[r.c1] = 1;
+      if (r.c2) e.cx[r.c2] = 1;
+      if (r.tl && !e.tl) e.tl = r.tl;
+    }
+    resE = [];
+    var base = 0, sg = 0, mo = 0, nClean = 0, un = {};
+    for (var key in g) {
+      var G = g[key],
+        L = Object.keys(G.inv).map(function (k) { return G.inv[k]; }).sort(function (a, b) { return a.t - b.t || a.n - b.n; }),
+        nD = 0, lastD = -1, firstD = -1, pgD = 0, j;
+      for (j = 0; j < L.length; j++) {
+        if (L[j].c === 'D') {
+          nD++;
+          lastD = j;
+          pgD += L[j].pg;
+          if (firstD < 0) firstD = j;
+        }
+      }
+      if (nD < minD) continue;
+      base++;
+      var la = L.slice(lastD + 1);
+      if (la.length < minL) continue;
+      var clean = L.length - nD === la.length;
+      if ((pat === 'clean' && !clean) || (pat === 'mixed' && clean)) continue;
+      var last = L[L.length - 1], dias = Math.round((rt - last.t) / 86400000);
+      if (dlim && dias > dlim) continue;
+      var pgL = 0;
+      la.forEach(function (x) { pgL += x.pg; });
+      var c = {
+        key: G.key, nombre: G.n, sucursal: G.b, cods: G.cods, cx: G.cx, tl: G.tl, cel: '',
+        nD: nD, primD: L[firstD].t, ultD: L[lastD].t, cambio: la[0].t, nLa: la.length, ultL: last.t,
+        dias: dias, gap: Math.round((la[0].t - L[lastD].t) / 86400000),
+        pat: clean ? 'Cambio total' : 'Alternan',
+        pgD: Math.round(pgD * 100) / 100, pgL: Math.round(pgL * 100) / 100,
+      };
+      var cds = Object.keys(c.cods).sort(function (a, b) { return a.length - b.length || (a < b ? -1 : 1); });
+      c.codigo = cds[0] || '';
+      c.todos = cds.join(', ');
+      phApply(c);
+      resE.push(c);
+      un[c.key] = 1;
+      if (clean) nClean++;
+      sg += c.gap;
+      mo += c.pgL;
+    }
+    var tot = resE.length;
+    $('ke1').textContent = fm(tot);
+    $('ke2').textContent = (base ? ((tot / base) * 100).toFixed(1) : 0) + '%';
+    $('ke3').textContent = fm(base);
+    $('ke4').textContent = tot ? fm(Math.round(sg / tot)) : '0';
+    $('ke5').textContent = 'L ' + fm(mo, 2);
+    $('noteE').textContent =
+      'Cliente con al menos ' + minD + ' compra(s) a domicilio en ' + (bf ? blabel(bf) : 'una misma FA') +
+      ' y ' + minL + ' o más compra(s) ' + (mode === 'local' ? 'en local' : 'por otro canal') +
+      ' después de la última a domicilio. ' + fm(nClean) + ' con cambio total y ' + fm(tot - nClean) +
+      ' que alternan canales · ' + fm(Object.keys(un).length) + ' clientes únicos (un mismo cliente puede aparecer una vez por FA).';
+    colsE = CE.filter(function (c) {
+      return (c[0] !== 'tl' || idx.tl >= 0 || phN) && (c[0] !== 'cel' || phN);
+    });
+    $('theadE').innerHTML = '<tr>' + colsE.map(function (c) { return '<th data-k="' + c[0] + '">' + c[1] + ' ⇅</th>'; }).join('') + '</tr>';
+    Array.prototype.forEach.call($('theadE').querySelectorAll('th'), function (th) {
+      th.onclick = function () {
+        var k = th.dataset.k;
+        sortDE = sortKE === k ? -sortDE : -1;
+        sortKE = k;
+        shownE = 300;
+        renderE();
+      };
+    });
+    shownE = 300;
+    renderE();
+  }
+  function listE() {
+    var q = norm($('qE').value);
+    var l = resE.filter(function (c) {
+      return !q || (c._s || (c._s = norm0([c.nombre, c.sucursal, c.codigo, c.todos, c.tl, c.cel].join(' ')))).indexOf(q) > -1;
+    });
+    l.sort(function (a, b) {
+      var x = a[sortKE], y = b[sortKE];
+      if (typeof x === 'string') return COL.compare(x, y) * sortDE;
+      return (x - y) * sortDE;
+    });
+    return l;
+  }
+  function renderE() {
+    var l = listE(), s = l.slice(0, shownE);
+    $('tbodyE').innerHTML =
+      s.map(function (c) {
+        return '<tr>' + colsE.map(function (k) {
+          var v = c[k[0]];
+          if (CED[k[0]]) return '<td>' + fmtD(new Date(v)) + '</td>';
+          if (k[0] === 'nombre') return '<td><a href="#" class="lk" data-k="' + esc(c.key) + '" data-b="' + esc(c.sucursal) + '">' + esc(v) + '</a></td>';
+          if (k[0] === 'sucursal') return '<td><span class="bchip">' + esc(v) + '</span></td>';
+          if (k[0] === 'dias') return '<td><span class="tag ' + (v >= 180 ? 't3' : v >= 90 ? 't2' : '') + '">' + v + ' días</span></td>';
+          if (k[0] === 'pat') return '<td><span class="tag ' + (v === 'Cambio total' ? 'okk' : 't2') + '">' + v + '</span></td>';
+          if (k[0] === 'pgD' || k[0] === 'pgL') return '<td class="n">' + fm(v, 2) + '</td>';
+          if (typeof v === 'number') return '<td class="n">' + fm(v) + '</td>';
+          return '<td>' + esc(v) + '</td>';
+        }).join('') + '</tr>';
+      }).join('') || '<tr><td colspan="' + colsE.length + '">Sin clientes con estos criterios.</td></tr>';
+    $('msgE').textContent = 'Mostrando ' + fm(Math.min(shownE, l.length)) + ' de ' + fm(l.length) + ' clientes (la descarga incluye todos). Haz clic en un cliente para ver sus facturas y el tipo de entrega de cada una.';
+    $('moreE').classList.toggle('hide', l.length <= shownE);
+  }
+  function matrixE() {
+    return [colsE.map(function (c) { return c[1]; })].concat(
+      listE().map(function (c) {
+        return colsE.map(function (k) {
+          return CED[k[0]] ? iso(new Date(c[k[0]])) : c[k[0]];
+        });
+      }),
+    );
+  }
+  function openClientE(key, br) {
+    var c = resE.filter(function (x) { return x.key === key && x.sucursal === br; })[0];
+    cur = {
+      key: key, name: c ? c.nombre : key, l: getLines(key), tab: 'c', br: br || '',
+      code: c && c.codigo ? c.codigo : '', tel: c ? [c.tl, c.cel].filter(Boolean).join(' / ') : '',
+    };
+    showClient('c');
+  }
+  $('tabE').onclick = function () { showTab('E'); };
+  ['minDE', 'minLE', 'daysE'].forEach(function (i) { $(i).addEventListener('input', laterE); });
+  ['branchE', 'patE', 'curE', 'exnegE'].forEach(function (i) { $(i).onchange = calcE; });
+  var tqE;
+  $('qE').oninput = function () {
+    clearTimeout(tqE);
+    tqE = setTimeout(function () { shownE = 300; renderE(); }, 160);
+  };
+  $('moreE').onclick = function () { shownE += 500; renderE(); };
+  $('tbodyE').addEventListener('click', function (e) {
+    var a = e.target.closest('a.lk');
+    if (!a) return;
+    e.preventDefault();
+    openClientE(a.dataset.k, a.dataset.b);
+  });
+  $('csvE').onclick = function () {
+    var m = matrixE();
+    colsE.forEach(function (c, j) {
+      if (c[0] === 'codigo' || c[0] === 'tl' || c[0] === 'cel')
+        for (var i = 1; i < m.length; i++) {
+          var v = String(m[i][j]);
+          if (/^\d{6,}$/.test(v) || /^0\d+$/.test(v)) m[i][j] = '="' + v + '"';
+        }
+    });
+    save('domicilio_a_local.csv', toCSV(m), 'text/csv;charset=utf-8');
+  };
+  $('copyE').onclick = function () {
+    var t = matrixE().map(function (r) { return r.join('\t'); }).join('\n'), b = $('copyE');
+    (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(
+      function () { b.textContent = '¡Copiado!'; },
+      function () { b.textContent = 'No se pudo copiar'; },
+    );
+    setTimeout(function () { b.textContent = 'Copiar'; }, 1800);
+  };
+  $('xlsxE').onclick = function () {
+    if (typeof XLSX === 'undefined') {
+      alert('No se pudo cargar la librería de Excel (necesita internet). Usa Descargar CSV: se abre directo en Excel.');
+      return;
+    }
+    try {
+      var m = matrixE(), i, ws;
+      colsE.forEach(function (c, j) {
+        if (CED[c[0]])
+          for (i = 1; i < m.length; i++) {
+            var p = String(m[i][j]).split('-');
+            m[i][j] = Math.round(Date.UTC(+p[0], +p[1] - 1, +p[2]) / 86400000) + 25569;
+          }
+      });
+      ws = XLSX.utils.aoa_to_sheet(m);
+      colsE.forEach(function (c, j) {
+        for (i = 1; i < m.length; i++) {
+          var cell = ws[XLSX.utils.encode_cell({ r: i, c: j })];
+          if (!cell) continue;
+          if (CED[c[0]]) cell.z = 'dd/mm/yyyy';
+          else if (c[0] === 'pgD' || c[0] === 'pgL') cell.z = '#,##0.00';
+          else if (c[0] === 'codigo' || c[0] === 'tl' || c[0] === 'cel') { cell.t = 's'; cell.v = String(cell.v); }
+        }
+      });
+      ws['!cols'] = colsE.map(function (c) { return { wch: c[0] === 'nombre' ? 34 : 16 }; });
+      var wb2 = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb2, ws, 'Domicilio a Local');
+      save('domicilio_a_local.xlsx', XLSX.write(wb2, { bookType: 'xlsx', type: 'array' }), XMIME);
+    } catch (x) {
+      alert('No se pudo generar el Excel: ' + x.message + '. Usa Descargar CSV.');
+    }
+  };
   $('tabA').onclick = function () {
     showTab('A');
   };
