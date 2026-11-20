@@ -1462,6 +1462,9 @@ td.cd {
 #flist td:first-child{color:var(--mu)}
 select.cat{width:auto;min-width:150px;height:30px;padding:0 8px;font-size:.8rem}
 select.cat.on{border-color:var(--ac);background:var(--acs);color:var(--ac);font-weight:600}
+input.com{width:100%;min-width:170px;height:30px;padding:0 8px;font:inherit;font-size:.8rem;border:1px solid var(--ln);border-radius:8px;background:var(--sf);color:var(--ink)}
+input.com.on{border-color:var(--ac);background:var(--acs)}
+input.com::placeholder{color:var(--mu)}
 .vw{height:30px;padding:0 10px;margin-right:6px}
 .vw[aria-expanded='true']{background:var(--acs);border-color:var(--ac);color:var(--ac)}
 #flist tr.pvr>td{background:var(--zb);padding:12px 14px;white-space:normal}
@@ -1570,7 +1573,7 @@ select.cat.on{border-color:var(--ac);background:var(--acs);color:var(--ac);font-
         <button id="fit" class="on" title="Ver todas las columnas en la pantalla sin desplazarte">Ajustar a pantalla</button>
         <details class="colmenu"><summary>Columnas</summary><div class="colbox" id="colbox"></div></details>
         <button id="copy">Copiar</button>
-        <button id="clrCalls" type="button" title="Quita todas las categorías de llamada marcadas">Borrar marcas</button>
+        <button id="clrCalls" type="button" title="Quita todas las categorías de llamada y los comentarios">Borrar marcas</button>
         <button id="csv" class="p">Descargar CSV</button>
         <button id="xlsx">Descargar Excel</button>
       </div>
@@ -2786,7 +2789,7 @@ select.cat.on{border-color:var(--ac);background:var(--acs);color:var(--ac);font-
         ? fm(skipName) +
           ' filas ignoradas por cliente genérico o vacío (consumidor final, descuentos, aseguradoras…). '
         : '') + (skipDate ? skipDate + ' sin fecha válida. ' : '');
-    cols = (idx.c1 >= 0 || idx.c2 >= 0 ? [['codigo', 'Código']] : []).concat([['nombre', 'Cliente'], ['cat', 'Categoría']]);
+    cols = (idx.c1 >= 0 || idx.c2 >= 0 ? [['codigo', 'Código']] : []).concat([['nombre', 'Cliente'], ['cat', 'Categoría'], ['com', 'Comentario']]);
     if (nLc) cols.push(['cuenta', 'Descuento / cuenta']);
     if (idx.ce >= 0) cols.push(['ce', 'Cédula']);
     if (idx.tl >= 0 || phN) cols.push(['tl', 'Teléfono']);
@@ -2880,8 +2883,8 @@ select.cat.on{border-color:var(--ac);background:var(--acs);color:var(--ac);font-
         return cf === '_' ? !v : v === cf;
       });
     l.sort(function (a, b) {
-      var x = sortK === 'cat' ? calls[a.key] || '' : a[sortK],
-        y = sortK === 'cat' ? calls[b.key] || '' : b[sortK];
+      var x = sortK === 'cat' ? calls[a.key] || '' : sortK === 'com' ? notes[a.key] || '' : a[sortK],
+        y = sortK === 'cat' ? calls[b.key] || '' : sortK === 'com' ? notes[b.key] || '' : b[sortK];
       if (x instanceof Date) {
         x = +x;
         y = +y;
@@ -3002,6 +3005,22 @@ select.cat.on{border-color:var(--ac);background:var(--acs);color:var(--ac);font-
     CATS.map(function (n) {
       return '<option value="' + esc(n) + '">' + esc(n) + '</option>';
     }).join('');
+  var NK = 'cnr_comentarios_v1',
+    notes = {};
+  try {
+    notes = JSON.parse(localStorage.getItem(NK) || '{}') || {};
+  } catch (e) {
+    notes = {};
+  }
+  function saveNotes() {
+    try {
+      localStorage.setItem(NK, JSON.stringify(notes));
+    } catch (e) {}
+  }
+  function comCell(key) {
+    var v = notes[key] || '';
+    return '<td><input type="text" class="com' + (v ? ' on' : '') + '" data-nk="' + esc(key) + '" value="' + esc(v) + '" maxlength="400" placeholder="Agregar comentario…" aria-label="Comentario de la llamada"></td>';
+  }
   function catCell(key) {
     var v = calls[key] || '';
     return (
@@ -3207,10 +3226,24 @@ select.cat.on{border-color:var(--ac);background:var(--acs);color:var(--ac);font-
     shown = 300;
     render();
   };
+  function onCom(e) {
+    var el = e.target.closest('input[data-nk]');
+    if (!el) return;
+    var k = el.dataset.nk,
+      v = el.value.trim();
+    if (v) notes[k] = v;
+    else delete notes[k];
+    saveNotes();
+    el.classList.toggle('on', !!v);
+  }
+  $('tbody').addEventListener('input', onCom);
+  $('tbodyB').addEventListener('input', onCom);
   $('clrCalls').onclick = function () {
-    if (!Object.keys(calls).length || !confirm('¿Borrar todas las marcas de llamadas?')) return;
+    if ((!Object.keys(calls).length && !Object.keys(notes).length) || !confirm('¿Borrar todas las marcas de llamadas y los comentarios?')) return;
     calls = {};
+    notes = {};
     saveCalls();
+    saveNotes();
     render();
     if (resB.length) renderB();
   };
@@ -3226,6 +3259,7 @@ select.cat.on{border-color:var(--ac);background:var(--acs);color:var(--ac);font-
               .map(function (k) {
                 var v = c[k[0]];
                 if (k[0] === 'cat') return catCell(c.key);
+                if (k[0] === 'com') return comCell(c.key);
                 if (k[0] === 'sucs')
                   return (
                     '<td>' +
@@ -3302,7 +3336,7 @@ select.cat.on{border-color:var(--ac);background:var(--acs);color:var(--ac);font-
     ].concat(
       view().map(function (c) {
         return cols.map(function (k) {
-          var v = k[0] === 'cat' ? calls[c.key] || '' : c[k[0]];
+          var v = k[0] === 'cat' ? calls[c.key] || '' : k[0] === 'com' ? notes[c.key] || '' : c[k[0]];
           return k[0] === 'ultima' ? iso(v) : v;
         });
       }),
@@ -4736,6 +4770,7 @@ select.cat.on{border-color:var(--ac);background:var(--acs);color:var(--ac);font-
       ['codigo', idx.c1 >= 0 ? 'Cód. cliente heredado' : 'Código'],
       ['nombre', 'Cliente heredado'],
       ['cat', 'Categoría'],
+      ['com', 'Comentario'],
       ['inst', 'Institución (cuenta)'],
     ];
     if (phN) colsB.push(['tl', 'Teléfono'], ['cel', 'Celular']);
@@ -4797,8 +4832,8 @@ select.cat.on{border-color:var(--ac);background:var(--acs);color:var(--ac);font-
         return cfB === '_' ? !v : v === cfB;
       });
     l.sort(function (a, b) {
-      var x = sortKB === 'cat' ? calls[a.key] || '' : a[sortKB],
-        y = sortKB === 'cat' ? calls[b.key] || '' : b[sortKB];
+      var x = sortKB === 'cat' ? calls[a.key] || '' : sortKB === 'com' ? notes[a.key] || '' : a[sortKB],
+        y = sortKB === 'cat' ? calls[b.key] || '' : sortKB === 'com' ? notes[b.key] || '' : b[sortKB];
       if (x instanceof Date) {
         x = +x;
         y = +y;
@@ -4820,6 +4855,7 @@ select.cat.on{border-color:var(--ac);background:var(--acs);color:var(--ac);font-
               .map(function (k) {
                 var v = c[k[0]];
                 if (k[0] === 'cat') return catCell(c.key);
+                if (k[0] === 'com') return comCell(c.key);
                 if (k[0] === 'sucs')
                   return (
                     '<td>' +
@@ -4896,7 +4932,7 @@ select.cat.on{border-color:var(--ac);background:var(--acs);color:var(--ac);font-
     ].concat(
       viewB().map(function (c) {
         return colsB.map(function (k) {
-          var v = k[0] === 'cat' ? calls[c.key] || '' : c[k[0]];
+          var v = k[0] === 'cat' ? calls[c.key] || '' : k[0] === 'com' ? notes[c.key] || '' : c[k[0]];
           return k[0] === 'ultima' ? iso(v) : v;
         });
       }),
